@@ -1,0 +1,17 @@
+project_id = "smart-learning"
+
+[api]
+enabled = true
+
+[db]
+port = 54322
+
+[auth]
+enabled = true
+site_url = "http://localhost:5000"
+
+[storage]
+enabled = true
+
+[realtime]
+enabled = true

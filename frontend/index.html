@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Smart Learning | Personal AI Classroom</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/app.css">
+  <link rel="stylesheet" href="/css/toast.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand"><span class="brand-mark">✦</span><span>smart<br><b>learning</b></span></div>
+      <div class="profile-mini"><div class="avatar">AK</div><div><strong>Alex Kim</strong><small>Curious learner</small></div><span class="status-dot"></span></div>
+      <nav aria-label="Main navigation">
+        <p class="nav-label">Workspace</p><a class="nav-item active" href="/"><span>⌂</span> Overview</a><a class="nav-item" href="/ai-teacher.html"><span>✦</span> AI Teacher</a><a class="nav-item" href="/notes.html"><span>▱</span> My Library</a><a class="nav-item" href="/study-planner.html"><span>◷</span> Study planner</a>
+        <p class="nav-label">Learn</p><a class="nav-item" href="/classroom.html"><span>◈</span> Subjects <em>4</em></a><a class="nav-item" href="/study-groups.html"><span>◎</span> Study groups</a><a class="nav-item" href="/analytics.html"><span>♢</span> Achievements</a>
+      </nav>
+      <div class="sidebar-foot"><a class="nav-item" href="/ai-settings.html"><span>⚙</span> AI settings</a><div class="upgrade"><span>◒</span><strong>Build your streak</strong><small>48 minutes to your weekly goal</small><div class="progress"><i style="width:68%"></i></div></div></div>
+    </aside>
+    <main class="main-content" id="dashboard">
+      <header class="topbar"><button class="mobile-menu" aria-label="Open menu">☰</button><div class="breadcrumbs">Workspace <span>/</span> Overview</div><div class="top-actions"><button class="icon-btn" aria-label="Notifications">♧<i></i></button><button class="help-btn">?</button><div class="avatar small">AK</div></div></header>
+      <section class="welcome"><div><p class="eyebrow">TUESDAY, SEPTEMBER 3</p><h1>Good morning, Alex<span>.</span></h1><p class="muted">Your next small win is waiting. Let's make it count.</p></div><button class="primary-btn" id="focus-btn">+ Start a focus session</button></section>
+      <section class="stats-grid"><article class="stat-card accent"><div class="stat-icon">◒</div><div><small>Weekly focus</small><strong>4h 48m</strong><span class="trend">↑ 18% <small>vs last week</small></span></div><div class="mini-bars"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></article><article class="stat-card"><div class="stat-icon green">♧</div><div><small>Current streak</small><strong>7 days</strong><span class="trend">Personal best</span></div><div class="streak-days"><b> M </b><b> T </b><b> W </b><b> T </b><b> F </b><b> S </b><b> S </b></div></article><article class="stat-card"><div class="stat-icon blue">⌁</div><div><small>Course mastery</small><strong>68%</strong><span class="trend blue-text">↑ 6% this month</span></div><div class="ring"><span>68</span></div></article></section>
+      <section class="content-grid"><div class="left-column"><div class="section-heading"><div><p class="eyebrow">CONTINUE LEARNING</p><h2>Pick up where you left off</h2></div><a href="#library">View library <span>→</span></a></div><article class="continue-card"><div class="course-art"><div class="orbit orbit-a"></div><div class="orbit orbit-b"></div><span>∑</span></div><div class="course-info"><span class="tag">MATHEMATICS</span><h3>Linear Algebra: The essentials</h3><p>Chapter 4 · Eigenvalues & vectors</p><div class="course-progress"><div><span>62% complete</span><span>18 min left</span></div><div class="progress"><i style="width:62%"></i></div></div><button class="text-btn" id="resume-btn">Continue chapter <span>→</span></button></div></article><div class="section-heading compact"><div><p class="eyebrow">UP NEXT</p><h2>Today's learning path</h2></div><button class="more-btn" aria-label="More options">•••</button></div><div class="path-list"><div class="path-item done"><span class="path-marker">✓</span><div><strong>Review yesterday's flashcards</strong><small>10 cards · 8 min</small></div><span class="done-label">DONE</span></div><div class="path-item"><span class="path-marker">2</span><div><strong>Quiz: Data structures</strong><small>10 questions · 15 min</small></div><button class="play-btn">▶</button></div><div class="path-item"><span class="path-marker">3</span><div><strong>Read: The Feynman technique</strong><small>Article · 12 min</small></div><button class="lock-btn">◌</button></div></div></div><aside class="right-column"><div class="ai-card"><div class="ai-heading"><span class="spark">✦</span><div><p class="eyebrow">YOUR AI TEACHER</p><h2>What are you curious about?</h2></div></div><p class="muted">Ask anything. I'll explain it at your pace, with examples that stick.</p><form id="ask-form"><div class="ask-input"><input id="prompt" aria-label="Ask your AI teacher" placeholder="e.g. Explain eigenvectors simply..." maxlength="6000"><button aria-label="Ask question">↑</button></div></form><div class="suggestions"><button data-prompt="Explain this like I'm a beginner">Explain like I'm a beginner</button><button data-prompt="Quiz me on my current topic">Quiz me</button><button data-prompt="Give me a real-world example">Real-world example</button></div><div class="answer" id="answer" hidden></div></div><div class="quick-card"><div class="section-heading compact"><div><p class="eyebrow">QUICK TOOLS</p><h2>Make progress</h2></div></div><button class="tool-row" id="scan-btn"><span class="tool-icon coral">⌁</span><div><strong>Scan & learn</strong><small>Turn a document into a study kit</small></div><span>→</span></button><button class="tool-row" id="quiz-btn"><span class="tool-icon yellow">◇</span><div><strong>Generate a quiz</strong><small>Test your understanding</small></div><span>→</span></button><button class="tool-row" id="planner-btn"><span class="tool-icon mint">◷</span><div><strong>Plan my study</strong><small>Build a path to your goal</small></div><span>→</span></button></div></aside></section>
+      <footer><span>SMART LEARNING · PERSONAL AI CLASSROOM</span><span id="provider-status">Connecting to AI Gateway...</span></footer>
+    </main>
+  </div>
+  <div class="toast" id="toast" role="status"></div><script src="/js/app.js"></script>
+</body>
+</html>
