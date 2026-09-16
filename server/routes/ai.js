@@ -12,7 +12,7 @@ router.get('/providers', (req, res) => {
 
 router.post('/chat', async (req, res) => {
   try {
-    const { prompt, task, context, provider = 'demo' } = req.body;
+    const { prompt, task, context, provider = process.env.GEMINI_API_KEY ? 'gemini' : (process.env.OPENAI_API_KEY ? 'openai' : 'ollama') } = req.body;
     if (!prompt || typeof prompt !== 'string' || prompt.length > 20000) return res.status(400).json({ error: 'Invalid prompt' });
     if (provider && typeof provider !== 'string') return res.status(400).json({ error: 'Invalid provider' });
     if (task && typeof task !== 'string') return res.status(400).json({ error: 'Invalid task' });
@@ -27,7 +27,7 @@ router.post('/chat', async (req, res) => {
 
 router.post('/chat/stream', async (req, res) => {
   try {
-    const { prompt, task, context, provider = 'demo' } = req.body;
+    const { prompt, task, context, provider = process.env.GEMINI_API_KEY ? 'gemini' : (process.env.OPENAI_API_KEY ? 'openai' : 'ollama') } = req.body;
     if (!prompt || typeof prompt !== 'string' || prompt.length > 20000) return res.status(400).json({ error: 'Invalid prompt' });
     if (provider && typeof provider !== 'string') return res.status(400).json({ error: 'Invalid provider' });
     if (task && typeof task !== 'string') return res.status(400).json({ error: 'Invalid task' });
@@ -52,7 +52,7 @@ router.post('/chat/stream', async (req, res) => {
 
 router.post('/quiz', async (req, res) => {
   try {
-    const { topic, provider = 'demo' } = req.body;
+    const { topic, provider = process.env.GEMINI_API_KEY ? 'gemini' : (process.env.OPENAI_API_KEY ? 'openai' : 'ollama') } = req.body;
     if (!topic || typeof topic !== 'string' || topic.length > 1000) return res.status(400).json({ error: 'Invalid topic' });
     if (provider && typeof provider !== 'string') return res.status(400).json({ error: 'Invalid provider' });
 

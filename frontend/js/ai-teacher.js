@@ -21,8 +21,8 @@ if (window.marked) {
 
 // Ensure DOMPurify doesn't strip out classes needed for code blocks
 const sanitizeOptions = {
-  ALLOWED_TAGS: ['b', 'i', 'em', 'strong', 'a', 'p', 'br', 'ul', 'ol', 'li', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'code', 'pre', 'blockquote', 'span', 'div'],
-  ALLOWED_ATTR: ['href', 'class', 'target']
+  ALLOWED_TAGS: ['b', 'i', 'em', 'strong', 'a', 'p', 'br', 'ul', 'ol', 'li', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'code', 'pre', 'blockquote', 'span', 'div', 'button'],
+  ALLOWED_ATTR: ['href', 'class', 'target', 'data-prompt']
 };
 
 function scrollToBottom() {
@@ -48,7 +48,7 @@ function formatTime(dateString) {
   return d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
 }
 
-const appendMessage = (text, role, animate = false, timestamp = null) => {
+const appendMessage = (text, role, animate = false, timestamp = null, isRawHtml = false) => {
   const wrapper = document.createElement('div');
   wrapper.className = `chat-bubble-wrapper ${role}`;
   
@@ -56,7 +56,9 @@ const appendMessage = (text, role, animate = false, timestamp = null) => {
   bubble.className = `chat-bubble ${role}`;
   
   // Render Markdown if available
-  if (window.marked && window.DOMPurify) {
+  if (isRawHtml) {
+    bubble.innerHTML = text;
+  } else if (window.marked && window.DOMPurify) {
     bubble.innerHTML = DOMPurify.sanitize(marked.parse(text), sanitizeOptions);
   } else {
     // Fallback if libs fail to load
@@ -177,7 +179,9 @@ const sendMessage = async (presetText = null) => {
   } catch (error) {
     console.error(error);
     document.getElementById('typing-indicator')?.remove();
-    appendMessage('Sorry, I am having trouble connecting to my brain right now. Please try again.', 'ai');
+    
+    const errBubble = appendMessage("Sorry, I couldn't connect to your AI Teacher right now.<br><br><button class='quick-action-chip' data-prompt='" + text.replace(/'/g, "&#39;") + "'>Retry</button>", 'ai', false, new Date(), true);
+
   } finally {
     sendBtn.disabled = false;
     chatInput.focus();

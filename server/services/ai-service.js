@@ -102,21 +102,8 @@ Always format your response beautifully using Markdown (bolding, bullet points, 
     return { text: data.candidates[0]?.content?.parts[0]?.text || '', provider: 'Gemini', model };
   }
 
-  // Fallback demo / rule-based AI
-  const lowercasePrompt = prompt.toLowerCase();
-  let responseText = "Hello! I am your AI Teacher. I am currently running in offline fallback mode without an API key, but I am here to help you study.";
   
-  if (lowercasePrompt.includes("what is this app") || lowercasePrompt.includes("about this app") || lowercasePrompt.includes("instructions")) {
-    responseText = "This is Smart Learning! It's a personalized AI classroom where you can track your study sessions, test your knowledge with quizzes, and chat with me (your AI teacher) to clear your doubts. Try clicking '+ Start a focus session' on your dashboard!";
-  } else if (lowercasePrompt.includes("hello") || lowercasePrompt.includes("hi") || lowercasePrompt.includes("hey")) {
-    responseText = "Hello there! I'm your AI teacher. What concept can I help you understand today?";
-  } else if (lowercasePrompt.includes("quiz")) {
-    responseText = "I can generate quizzes for you! Just click the 'Generate a quiz' button on the dashboard, or type a specific topic here and I'll test you.";
-  } else if (lowercasePrompt.includes("explain") || lowercasePrompt.includes("what is")) {
-    responseText = "That's a great question! In a live environment with an OpenAI or Gemini API key, I would generate a detailed, easy-to-understand explanation for you. For now, imagine a perfectly clear explanation here!";
-  } else if (lowercasePrompt.includes("thank")) {
-    responseText = "You're very welcome! Keep up the great studying!";
-  }
+  // If no configured provider was matched, or we hit a default fallback, throw an error as requested by the user.
+  throw new Error("AI service unavailable. Please configure an API key (e.g. GEMINI_API_KEY).");
 
-  return { text: responseText, provider: 'demo', model: 'rule-based' };
 };
