@@ -354,10 +354,10 @@ document.addEventListener('DOMContentLoaded', async () => {
           const res = await fetch('/api/ai/chat', {
             method: 'POST',
             headers: await getHeaders(),
-            body: JSON.stringify({ message: prompt })
+            body: JSON.stringify({ prompt: prompt, task: 'knowledge_assist' })
           });
           const data = await res.json();
-          aiResponse.innerHTML = formatMarkdown(data.reply);
+          aiResponse.innerHTML = formatMarkdown(data.text);
         } catch (e) {
           aiResponse.innerHTML = '<p style="color:red">Failed to reach AI.</p>';
         }
@@ -377,12 +377,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         const res = await fetch('/api/ai/chat', {
           method: 'POST',
           headers: await getHeaders(),
-          body: JSON.stringify({ message: prompt })
+          body: JSON.stringify({ prompt: prompt, task: 'knowledge_assist' })
         });
         const data = await res.json();
         
         // Very basic parsing attempt
-        const jsonMatch = data.reply.match(/\[[\s\S]*\]/);
+        const jsonMatch = data.text.match(/\[[\s\S]*\]/);
         if (jsonMatch) {
           const cards = JSON.parse(jsonMatch[0]);
           flashcardsPreview.innerHTML = cards.map(c => `
