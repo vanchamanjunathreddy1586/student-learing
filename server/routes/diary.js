@@ -49,8 +49,9 @@ function requireDiaryToken(req, res, next) {
   }
 }
 
-// PIN SETUP
-router.post('/security/setup', async (req, res) => {
+
+// AUTH REGISTER
+router.post('/auth/register', async (req, res) => {
   let adminSb;
   try {
     adminSb = getAdminSupabase();
@@ -58,28 +59,26 @@ router.post('/security/setup', async (req, res) => {
     return res.status(500).json({ error: e.message });
   }
   
-  const { pin } = req.body;
-  if (!pin || typeof pin !== 'string' || pin.length < 4 || pin.length > 6 || !/^\d+$/.test(pin)) {
-    return res.status(400).json({ error: 'PIN must be 4 to 6 digits.' });
-  }
-  
-  const invalidPins = ['0000', '000000', '1111', '111111', '1234', '123456'];
-  if (invalidPins.includes(pin)) {
-    return res.status(400).json({ error: 'Please choose a stronger PIN.' });
-  }
+  const { email, password, pin } = req.body;
+  if (!email || !password || !pin) return res.status(400).json({ error: 'Missing fields.' });
+  if (password.length < 6) return res.status(400).json({ error: 'Password must be at least 6 characters.' });
+  if (!/^\d+$/.test(pin) || pin.length < 4 || pin.length > 6) return res.status(400).json({ error: 'PIN must be 4 to 6 digits.' });
 
   const sb = getSupabase(req);
   if (!sb) return res.status(401).json({ error: 'Auth required' });
 
-  const { data: existing } = await sb.from('diary_security').select('id').eq('user_id', req.user.id).maybeSingle();
+  const { data: existing } = await sb.from('diary_accounts').select('id').eq('user_id', req.user.id).maybeSingle();
   if (existing) {
-    return res.status(400).json({ error: 'PIN is already set up.' });
+    return res.status(400).json({ error: 'Diary account already exists.' });
   }
 
   try {
+    const password_hash = await bcrypt.hash(password, 10);
     const pin_hash = await bcrypt.hash(pin, 10);
-    const { error } = await sb.from('diary_security').insert([{
+    const { error } = await sb.from('diary_accounts').insert([{
       user_id: req.user.id,
+      email,
+      password_hash,
       pin_hash
     }]);
     
@@ -91,8 +90,8 @@ router.post('/security/setup', async (req, res) => {
   }
 });
 
-// PIN LOGIN
-router.post('/security/login', async (req, res) => {
+// AUTH LOGIN
+router.post('/auth/login', async (req, res) => {
   let adminSb;
   try {
     adminSb = getAdminSupabase();
@@ -100,151 +99,78 @@ router.post('/security/login', async (req, res) => {
     return res.status(500).json({ error: e.message });
   }
   
-  const { pin } = req.body;
+  const { email, password } = req.body;
   
-  // Need admin client to bypass RLS and read the hash, because we need to check locked_until and failed_attempts.
-  // Wait, if RLS allows users to read their own diary_security, sb works too. Let's use sb for safety but adminSb if necessary.
   const sb = getSupabase(req);
+  const { data: acc, error } = await sb.from('diary_accounts').select('*').eq('user_id', req.user.id).maybeSingle();
   
-  const { data: securityRow, error } = await sb.from('diary_security').select('*').eq('user_id', req.user.id).maybeSingle();
-  
-  if (error) {
-    console.error("Diary security fetch error:", error);
-    return res.status(500).json({ error: "Failed to verify security status." });
-  }
-  
-  if (!securityRow) {
-    return res.status(404).json({ error: 'No PIN setup found.' });
-  }
+  if (error) return res.status(500).json({ error: "Failed to verify security status." });
+  if (!acc) return res.status(404).json({ error: 'No Diary Account found.' });
+  if (acc.email !== email) return res.status(401).json({ error: 'Incorrect Diary email.' });
 
-  // Check brute force
-  if (securityRow.locked_until && new Date(securityRow.locked_until) > new Date()) {
-    const diff = Math.ceil((new Date(securityRow.locked_until) - new Date()) / 1000);
+  if (acc.locked_until && new Date(acc.locked_until) > new Date()) {
+    const diff = Math.ceil((new Date(acc.locked_until) - new Date()) / 1000);
     return res.status(429).json({ error: `Too many attempts. Try again in ${diff} seconds.`, locked: true });
   }
 
-  const isMatch = await bcrypt.compare(pin, securityRow.pin_hash);
+  const isMatch = await bcrypt.compare(password, acc.password_hash);
 
   if (!isMatch) {
-    const fails = (securityRow.failed_attempts || 0) + 1;
+    const fails = (acc.failed_attempts || 0) + 1;
     let locked_until = null;
-    if (fails >= 5) {
-      locked_until = new Date(Date.now() + 30000).toISOString(); // 30 seconds lock
-    }
-    await adminSb.from('diary_security').update({ failed_attempts: fails, locked_until }).eq('user_id', req.user.id);
+    if (fails >= 5) locked_until = new Date(Date.now() + 30000).toISOString();
+    await adminSb.from('diary_accounts').update({ failed_attempts: fails, locked_until }).eq('user_id', req.user.id);
     
     if (locked_until) {
-      return res.status(429).json({ error: `Too many incorrect attempts. Try again in 30 seconds.`, locked: true });
+      return res.status(429).json({ error: 'Too many incorrect attempts. Try again in 30 seconds.', locked: true });
     } else {
-      return res.status(401).json({ error: 'Incorrect PIN.' });
+      return res.status(401).json({ error: 'Incorrect Diary password.' });
     }
   }
 
-  // Success
-  await adminSb.from('diary_security').update({ 
+  await adminSb.from('diary_accounts').update({ 
     failed_attempts: 0, 
     locked_until: null,
-    last_unlocked_at: new Date().toISOString()
+    last_login: new Date().toISOString()
   }).eq('user_id', req.user.id);
 
   const token = signDiaryToken(req.user.id);
   res.json({ success: true, diaryToken: token });
 });
 
-// PIN CHANGE
-router.post('/security/change-pin', async (req, res) => {
-  let adminSb;
-  try {
-    adminSb = getAdminSupabase();
-  } catch (e) {
-    return res.status(500).json({ error: e.message });
-  }
-  const sb = getSupabase(req);
-  if (!sb || !adminSb) return res.status(401).json({ error: 'Auth required' });
-  
-  const { currentPin, newPin } = req.body;
-  
-  const { data: securityRow, error } = await sb.from('diary_security').select('*').eq('user_id', req.user.id).maybeSingle();
-  if (error) return res.status(500).json({ error: "Failed to verify security status." });
-  if (!securityRow) return res.status(404).json({ error: 'No PIN setup found.' });
-  
-  if (securityRow.locked_until && new Date(securityRow.locked_until) > new Date()) {
-    return res.status(429).json({ error: 'Account temporarily locked.' });
-  }
-
-  const isMatch = await bcrypt.compare(currentPin, securityRow.pin_hash);
-  if (!isMatch) {
-    return res.status(401).json({ error: 'Current PIN is incorrect.' });
-  }
-
-  if (!newPin || typeof newPin !== 'string' || newPin.length < 4 || newPin.length > 6 || !/^\d+$/.test(newPin)) {
-    return res.status(400).json({ error: 'New PIN must be 4 to 6 digits.' });
-  }
-
-  const pin_hash = await bcrypt.hash(newPin, 10);
-  await adminSb.from('diary_security').update({ pin_hash }).eq('user_id', req.user.id);
-  
-  res.json({ success: true });
-});
-
-// PIN RESET (Forgot PIN)
-router.post('/security/reset', async (req, res) => {
-  let adminSb;
-  try {
-    adminSb = getAdminSupabase();
-  } catch (e) {
-    return res.status(500).json({ error: e.message });
-  }
-  
-  // This endpoint requires standard Supabase authentication (which is handled globally).
-  // The user just provides a new PIN. This essentially acts as a "hard reset" 
-  // since they are logged into the Supabase account.
-  const { newPin } = req.body;
-  
-  if (!newPin || typeof newPin !== 'string' || newPin.length < 4 || newPin.length > 6 || !/^\d+$/.test(newPin)) {
-    return res.status(400).json({ error: 'New PIN must be 4 to 6 digits.' });
-  }
-
-  const pin_hash = await bcrypt.hash(newPin, 10);
-  const { data, error } = await adminSb.from('diary_security')
-    .update({ 
-      pin_hash,
-      failed_attempts: 0,
-      locked_until: null,
-      last_unlocked_at: new Date().toISOString()
-    })
-    .eq('user_id', req.user.id)
-    .select();
-
-  if (error) return res.status(500).json({ error: "Failed to reset PIN." });
-  if (!data || data.length === 0) {
-    return res.status(404).json({ error: 'No PIN setup found.' });
-  }
-
-  const token = signDiaryToken(req.user.id);
-  res.json({ success: true, diaryToken: token });
-});
-
-// CHECK PIN STATUS (for UI)
-router.get('/security/status', async (req, res) => {
+// AUTH STATUS
+router.get('/auth/status', async (req, res) => {
   const sb = getSupabase(req);
   if (!sb) return res.status(401).json({ error: 'Auth required' });
   
-  const { data, error } = await sb.from('diary_security').select('id').eq('user_id', req.user.id).maybeSingle();
-  if (error) {
-    console.error("Diary security fetch error:", error);
-    return res.status(500).json({ error: "Security status check failed." });
-  }
-  res.json({ hasPin: !!data });
+  const { data, error } = await sb.from('diary_accounts').select('id, email').eq('user_id', req.user.id).maybeSingle();
+  if (error) return res.status(500).json({ error: "Security status check failed." });
+  res.json({ hasAccount: !!data, email: data ? data.email : null });
 });
 
-// LOGOUT (Clear server-side session concepts if any)
-router.post('/security/logout', async (req, res) => {
-  // Since we use stateless JWT, we can't inherently destroy it on the server 
-  // without a blacklist, but the client will drop it. We just return success.
+// AUTH LOGOUT
+router.post('/auth/logout', async (req, res) => {
   res.json({ success: true });
 });
 
+// FORGOT PASSWORD
+router.post('/auth/forgot-password', async (req, res) => {
+  let adminSb;
+  try { adminSb = getAdminSupabase(); } catch (e) { return res.status(500).json({ error: e.message }); }
+  const { newPassword } = req.body;
+  if (!newPassword || newPassword.length < 6) return res.status(400).json({ error: 'Password must be at least 6 characters.' });
+  
+  const password_hash = await bcrypt.hash(newPassword, 10);
+  const { data, error } = await adminSb.from('diary_accounts')
+    .update({ password_hash, failed_attempts: 0, locked_until: null })
+    .eq('user_id', req.user.id).select();
+
+  if (error) return res.status(500).json({ error: "Failed to reset password." });
+  if (!data || data.length === 0) return res.status(404).json({ error: 'No Diary Account found.' });
+  
+  const token = signDiaryToken(req.user.id);
+  res.json({ success: true, diaryToken: token });
+});
 
 // GET all diaries (with optional search and date filters)
 router.get('/', requireDiaryToken, async (req, res) => {
