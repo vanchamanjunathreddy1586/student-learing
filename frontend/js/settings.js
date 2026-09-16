@@ -28,8 +28,13 @@ const initials = (name) => name.split(/\s+/).filter(Boolean).slice(0, 2).map((pa
 const applySettings = () => { 
   document.querySelectorAll('[data-setting]').forEach((input) => { 
     const value = getPath(settings, input.dataset.setting); 
-    if (input.type === 'checkbox') input.checked = Boolean(value); 
-    else input.value = value ?? ''; 
+    if (input.type === 'checkbox') {
+      input.checked = Boolean(value); 
+    } else if (input.type === 'radio') {
+      input.checked = (input.value === value);
+    } else {
+      input.value = value ?? ''; 
+    }
   }); 
   document.querySelector('#accent-value').textContent = settings.accent_color; 
   document.querySelector('#study-goal-value').textContent = `${settings.learning_preferences.study_goal} min`; 
