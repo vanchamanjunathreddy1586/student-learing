@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="en" data-theme="premium">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
+  <title>Admin Attendance | Smart Learning</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/app.css">
+  <link rel="stylesheet" href="/css/dashboard.css">
+  <link rel="stylesheet" href="/css/themes.css">
+  <link rel="stylesheet" href="/css/toast.css">
+  <style>
+    .admin-panel { background: var(--t-panel); padding: 24px; border-radius: var(--t-radius); border: var(--t-border); margin-bottom: 24px; }
+    .upload-zone { border: 2px dashed var(--t-primary); padding: 40px 20px; text-align: center; border-radius: var(--t-radius); cursor: pointer; transition: 0.2s; background: rgba(139, 92, 246, 0.05); }
+    .upload-zone:hover, .upload-zone.dragover { background: rgba(139, 92, 246, 0.15); border-color: #7c3aed; }
+    .upload-zone input { display: none; }
+    
+    table.data-table { width: 100%; border-collapse: collapse; margin-top: 16px; font-size: 14px; }
+    table.data-table th, table.data-table td { padding: 12px; border-bottom: var(--t-border); text-align: left; }
+    table.data-table th { color: var(--t-muted); font-weight: 500; text-transform: uppercase; font-size: 12px; }
+    
+    .status-badge { padding: 4px 8px; border-radius: 12px; font-size: 12px; font-weight: 600; }
+    .status-Present { background: rgba(34, 197, 94, 0.2); color: #16a34a; }
+    .status-Absent { background: rgba(239, 68, 68, 0.2); color: #dc2626; }
+    .status-Late { background: rgba(234, 179, 8, 0.2); color: #ca8a04; }
+    
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
+    .stat-card { background: var(--t-panel); padding: 16px; border-radius: var(--t-radius); border: var(--t-border); }
+    .stat-card h4 { margin: 0; color: var(--t-muted); font-size: 12px; text-transform: uppercase; }
+    .stat-card p { margin: 8px 0 0; font-size: 24px; font-weight: 700; color: var(--t-text); }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+<body class="dashboard-page">
+  <div class="toast" id="toast" role="status"></div>
+  <div class="sidebar-overlay"></div>
+  <div class="app-shell" id="dashboard-shell">
+    <aside class="sidebar">
+      <div class="brand"><span class="brand-mark">SL</span><span>smart<br><b>admin</b></span></div>
+      <a class="profile-mini profile-link" href="/settings.html#account"><div class="avatar" data-profile-initials>SL</div><div><strong data-profile-name>Admin</strong><small>Profile &amp; settings</small></div><span class="status-dot"></span></a>
+      <nav aria-label="Main navigation">
+          <p class="nav-label">Management</p>
+          <a class="nav-item" href="/admin.html"><span>⚙️</span> Admin Dashboard</a>
+          <a class="nav-item active" href="/admin-attendance.html"><span>📅</span> Attendance</a>
+      </nav>
+      <div class="sidebar-foot">
+        <button class="sign-out-button" id="sign-out-button" type="button">🚪 Sign out</button>
+      </div>
+    </aside>
+    
+    <main class="main-content">
+      <header class="topbar">
+        <button class="mobile-menu" aria-label="Open menu">☰</button>
+        <div class="breadcrumbs">Admin <span>/</span> Attendance Upload</div>
+      </header>
+      
+      <div class="dashboard-content">
+        
+        <div class="stats-grid" id="admin-stats">
+          <div class="stat-card"><h4>Total Records</h4><p id="stat-total">0</p></div>
+          <div class="stat-card"><h4>Overall Present</h4><p id="stat-present" style="color: #16a34a">0</p></div>
+          <div class="stat-card"><h4>Overall Absent</h4><p id="stat-absent" style="color: #dc2626">0</p></div>
+        </div>
+
+        <div class="admin-panel">
+          <h2>Bulk Upload Attendance</h2>
+          <p class="muted">Upload an Excel (.xlsx) or CSV file. Required columns: <code>Student ID</code>, <code>Subject</code>, <code>Date</code>, <code>Status</code>.</p>
+          
+          <div class="upload-zone" id="drop-zone">
+            <h1 style="font-size:3rem; margin:0">📁</h1>
+            <p>Drag & drop Excel/CSV here or <strong>browse files</strong></p>
+            <input type="file" id="file-input" accept=".xlsx, .xls, .csv">
+          </div>
+          
+          <div id="preview-section" style="display:none; margin-top: 24px;">
+            <h3>Preview <span id="preview-count" class="muted"></span></h3>
+            <div style="max-height: 300px; overflow-y:auto; border:var(--t-border); border-radius:var(--t-radius);">
+              <table class="data-table" id="preview-table">
+                <thead><tr><th>Student ID</th><th>Subject</th><th>Date</th><th>Status</th><th>Validation</th></tr></thead>
+                <tbody></tbody>
+              </table>
+            </div>
+            
+            <div style="margin-top: 16px; display:flex; gap:12px; justify-content:flex-end;">
+              <button class="btn-secondary" id="cancel-upload">Cancel</button>
+              <button class="primary-btn" id="confirm-upload">Upload Valid Records</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="/js/supabase.js"></script>
+  <script src="/js/app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      // Security Check
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return window.location.href = '/login.html';
+      
+      const { data: profile } = await supabase.from('student_profiles').select('role').eq('user_id', session.user.id).single();
+      if (!profile || !['admin', 'owner', 'lecturer'].includes(profile.role)) {
+        document.body.innerHTML = '<h1 style="color:red;text-align:center;padding:50px;">Access Denied. Admin only.</h1>';
+        return;
+      }
+
+      // Load Stats
+      try {
+        const res = await fetch('/api/attendance/admin/stats', { headers: { 'Authorization': `Bearer ${session.access_token}` } });
+        if(res.ok) {
+          const stats = await res.json();
+          document.getElementById('stat-total').textContent = stats.total;
+          document.getElementById('stat-present').textContent = stats.present;
+          document.getElementById('stat-absent').textContent = stats.absent;
+        }
+      } catch (e) { console.error('Stats fail', e); }
+
+      // Upload Logic
+      const dropZone = document.getElementById('drop-zone');
+      const fileInput = document.getElementById('file-input');
+      const previewSection = document.getElementById('preview-section');
+      const previewTableBody = document.querySelector('#preview-table tbody');
+      
+      let pendingRecords = [];
+
+      dropZone.addEventListener('click', () => fileInput.click());
+      dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
+      dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+      dropZone.addEventListener('drop', e => {
+        e.preventDefault();
+        dropZone.classList.remove('dragover');
+        if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+      });
+      fileInput.addEventListener('change', e => {
+        if (e.target.files.length) handleFile(e.target.files[0]);
+      });
+
+      function handleFile(file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const data = new Uint8Array(e.target.result);
+          const workbook = XLSX.read(data, {type: 'array'});
+          const firstSheet = workbook.SheetNames[0];
+          const rows = XLSX.utils.sheet_to_json(workbook.Sheets[firstSheet]);
+          processRows(rows, file.name);
+        };
+        reader.readAsArrayBuffer(file);
+      }
+
+      function processRows(rows, fileName) {
+        pendingRecords = [];
+        previewTableBody.innerHTML = '';
+        
+        let valid = 0, invalid = 0;
+        
+        rows.forEach(r => {
+          // Normalize keys (handle spaces and case)
+          const row = {};
+          for (let key in r) { row[key.trim().toLowerCase()] = r[key]; }
+          
+          const studentId = row['student id'] || row['studentid'] || row['id'];
+          const subject = row['subject'] || row['course'];
+          const date = row['date'];
+          let status = row['status'];
+          
+          // Basic validation
+          let error = [];
+          if (!studentId) error.push('Missing ID');
+          if (!subject) error.push('Missing Subject');
+          if (!date) error.push('Missing Date');
+          
+          const validStatuses = ['present', 'absent', 'late', 'excused'];
+          if (!status || !validStatuses.includes(status.toString().toLowerCase())) {
+            error.push('Invalid Status');
+            status = 'Absent'; // Default visually, but marked invalid
+          } else {
+            status = status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
+          }
+
+          if (error.length === 0) valid++; else invalid++;
+
+          pendingRecords.push({ student_id: studentId, subject, date, status, valid: error.length === 0, fileName });
+
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${studentId || '-'}</td>
+            <td>${subject || '-'}</td>
+            <td>${date || '-'}</td>
+            <td><span class="status-badge status-${status}">${status || '-'}</span></td>
+            <td style="color:${error.length ? 'red' : 'green'}">${error.length ? error.join(', ') : 'Valid'}</td>
+          `;
+          previewTableBody.appendChild(tr);
+        });
+
+        document.getElementById('preview-count').textContent = `(${valid} valid, ${invalid} errors)`;
+        previewSection.style.display = 'block';
+      }
+
+      document.getElementById('cancel-upload').addEventListener('click', () => {
+        previewSection.style.display = 'none';
+        pendingRecords = [];
+        fileInput.value = '';
+      });
+
+      document.getElementById('confirm-upload').addEventListener('click', async () => {
+        const toUpload = pendingRecords.filter(r => r.valid);
+        if (toUpload.length === 0) return alert('No valid records to upload.');
+        
+        const btn = document.getElementById('confirm-upload');
+        btn.textContent = 'Uploading...';
+        btn.disabled = true;
+
+        try {
+          const res = await fetch('/api/attendance/upload', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${session.access_token}`
+            },
+            body: JSON.stringify({ records: toUpload, fileName: toUpload[0].fileName })
+          });
+          
+          const result = await res.json();
+          if (!res.ok) throw new Error(result.error || 'Upload failed');
+          
+          alert(`Success! Uploaded ${result.successful} records. ${result.failed} records were rejected (e.g., student ID not found).`);
+          location.reload();
+        } catch (e) {
+          alert('Error: ' + e.message);
+          btn.textContent = 'Upload Valid Records';
+          btn.disabled = false;
+        }
+      });
+    });
+  </script>
+</body>
+</html>

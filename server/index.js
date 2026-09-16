@@ -8,6 +8,7 @@ import studyRouter from './routes/study.js';
 import groupsRouter from './routes/groups.js';
 import adminRouter from './routes/admin.js';
 import knowledgeRouter from './routes/knowledge.js';
+import attendanceRouter from './routes/attendance.js';
 import ownerRouter from './routes/owner.js';
 import diaryRouter from './routes/diary.js';
 
@@ -55,6 +56,7 @@ app.use('/api/analytics', authenticate, studyRouter); // Map analytics to study 
 app.use('/api/groups', authenticate, groupsRouter);
 app.use('/api/admin', authenticate, adminRouter);
 app.use('/api/knowledge', authenticate, knowledgeRouter);
+app.use('/api/attendance', authenticate, attendanceRouter);
 app.use('/api/owner', authenticate, ownerRouter);
 app.use('/api/diary', authenticate, diaryRouter);
 
