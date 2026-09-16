@@ -137,7 +137,8 @@ const sendMessage = async (presetText = null) => {
       conversation_id: currentConversationId,
       role: 'user',
       content: text
-    }]).then();
+    }])
+      .then(({ error }) => { if (error) console.error('Database error:', error); });
   }
   
   // Typing indicator
@@ -161,8 +162,8 @@ const sendMessage = async (presetText = null) => {
       body: JSON.stringify({ prompt: text, task: 'tutor' })
     });
     
-    if (!res.ok) throw new Error('AI failed');
     const data = await res.json();
+    if (!res.ok) throw new Error(data.message || 'AI failed');
     
     document.getElementById('typing-indicator')?.remove();
     appendMessage(data.text, 'ai');
@@ -173,7 +174,8 @@ const sendMessage = async (presetText = null) => {
         conversation_id: currentConversationId,
         role: 'assistant',
         content: data.text
-      }]).then();
+      }])
+      .then(({ error }) => { if (error) console.error('Database error:', error); });
     }
     
   } catch (error) {

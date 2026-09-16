@@ -1,20 +1,5 @@
 export const PROVIDER_REGISTRY = Object.freeze([
   {
-    id: 'demo',
-    name: 'Smart Learning demo',
-    category: 'demo',
-    model: 'guided-tutor',
-    available: true,
-    capabilities: ['chat', 'explain', 'quiz', 'planner'],
-    speed: 'instant',
-    context_window: '32k',
-    requiresApiKey: false,
-    configSchema: {
-      mode: { type: 'string', required: true, default: 'demo' },
-      enabled: { type: 'boolean', required: false, default: true },
-    },
-  },
-  {
     id: 'openai',
     name: 'OpenAI',
     category: 'ai',
@@ -43,21 +28,6 @@ export const PROVIDER_REGISTRY = Object.freeze([
     configSchema: {
       apiKey: { type: 'string', secret: true, required: false, env: 'GEMINI_API_KEY' },
       model: { type: 'string', required: false, default: 'gemini-1.5-flash' },
-    },
-  },
-  {
-    id: 'anthropic',
-    name: 'Anthropic Claude',
-    category: 'ai',
-    model: 'claude-3-5-sonnet',
-    available: true,
-    capabilities: ['chat', 'explain', 'summary'],
-    speed: 'balanced',
-    context_window: '200k',
-    requiresApiKey: true,
-    configSchema: {
-      apiKey: { type: 'string', secret: true, required: false, env: 'ANTHROPIC_API_KEY' },
-      model: { type: 'string', required: false, default: 'claude-3-5-sonnet' },
     },
   },
   {
