@@ -1,18 +1,9 @@
-<!doctype html>
-<html lang="en">
-<head><script src="/js/theme-manager.js"></script>
-    
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
-  <title>Student Learning | AI Teacher</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/css/app.css">
-  <link rel="stylesheet" href="/css/dashboard.css">
-    <link rel="stylesheet" href="/css/themes.css">
-  <link rel="stylesheet" href="/css/toast.css">
-  
+import fs from 'fs';
+
+const htmlFile = 'frontend/ai-teacher.html';
+let content = fs.readFileSync(htmlFile, 'utf8');
+
+const newStyles = `
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.8/purify.min.js"></script>
@@ -307,32 +298,13 @@
     }
     
     @keyframes spin { 100% { transform: rotate(360deg); } }
-  </style>
-</head>
-<body class="dashboard-page">
-  <div class="app-shell" id="dashboard-shell">
-    <div class="sidebar-overlay"></div>
-      <aside class="sidebar">
-      <div class="brand"><span class="brand-mark">✦</span><span>smart<br><b>learning</b></span></div>
-      <a class="profile-mini profile-link" href="/settings.html#account" aria-label="Open profile and settings"><div class="avatar" data-profile-initials>SL</div><div><strong data-profile-name>Student</strong><small>Profile &amp; settings</small></div><span class="status-dot"></span></a>
-      <nav aria-label="Main navigation">
-          <p class="nav-label">Workspace</p>
-          <a class="nav-item " href="/"><span>🏠</span> Overview</a>
-          <a class="nav-item active" href="/ai-teacher.html"><span>🤖</span> AI Teacher</a>
-          <a class="nav-item " href="/scan-learn.html"><span>📷</span> Scan & Learn</a>
-          <a class="nav-item " href="/study-planner.html"><span>📅</span> Study planner</a>
-          
-          <p class="nav-label">Learn</p>
-          <a class="nav-item " href="/classroom.html"><span>📚</span> Subjects</a>
-          <a class="nav-item " href="/quiz.html"><span>📝</span> Quizzes</a>
-          <a class="nav-item " href="/groups.html"><span>👥</span> Study Groups</a>
-          <a class="nav-item " href="/analytics.html"><span>📊</span> Analytics & Gamification</a>
-          
-          <p class="nav-label">Personal</p>
-          <a class="nav-item " href="/diary.html"><span>📔</span> Student Diary</a>
-        </nav>
-    </aside>
-    
+  </style>`;
+
+// Replace existing style block with the new styles
+content = content.replace(/<style>[\s\S]*?<\/style>/, newStyles);
+
+// Replace main content with the new layout
+const newMainContent = `
     <main class="main-content ai-chat-layout">
       <header class="ai-header">
         <button class="mobile-menu" aria-label="Open menu"><i class="fas fa-bars"></i></button>
@@ -378,11 +350,10 @@
         </div>
       </div>
     </main>
+`;
 
-  </div>
-  <div class="toast" id="toast" role="status"></div>
-  <script type="module" src="/js/supabase.js"></script>
-  <script type="module" src="/js/ai-teacher.js"></script>
-<script type="module" src="/js/app.js"></script>
-</body>
-</html>
+// Replace everything between <main class="main-content"> and </main>
+content = content.replace(/<main class="main-content">[\s\S]*?<\/main>/, newMainContent);
+
+fs.writeFileSync(htmlFile, content);
+console.log("Patched ai-teacher.html layout");

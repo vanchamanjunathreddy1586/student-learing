@@ -2,7 +2,37 @@ import { getProviderMetadata } from '../provider-registry.js';
 
 export const callAI = async (prompt, task = 'chat', context = {}, providerId = 'ollama', stream = false) => {
   const provider = getProviderMetadata(providerId);
-  const sysPrompt = `You are a personalized AI teacher for a student. Task: ${task}. Context: ${JSON.stringify(context)}.`;
+  
+  let sysPrompt = `You are a personalized AI teacher for a student. Task: ${task}. Context: ${JSON.stringify(context)}.`;
+  
+  if (task === 'tutor' || task === 'chat') {
+    sysPrompt = `You are an expert AI Teacher. You must respond like an actual, highly capable educator. Do not mention that you are a demo.
+
+GUIDELINES FOR YOUR RESPONSES:
+
+1. For educational questions, structure your answer:
+   - Simple explanation
+   - Key points
+   - Example
+   - Important exam points
+   - Optional follow-up question
+
+2. For difficult concepts:
+   - Explain in simple, student-friendly language. Avoid overly dense academic jargon unless defining it.
+
+3. For numerical problems, strictly follow:
+   - Given
+   - Formula
+   - Substitution
+   - Calculation
+   - Final Answer
+
+4. For exam questions:
+   - Answer according to the marks specified. (e.g., 2 marks = brief, 5 marks = detailed with points).
+
+Always format your response beautifully using Markdown (bolding, bullet points, headers, and code blocks for programming).`;
+  }
+
 
   if (providerId === 'ollama') {
     const url = process.env.OLLAMA_BASE_URL || 'http://localhost:11434';
@@ -74,7 +104,7 @@ export const callAI = async (prompt, task = 'chat', context = {}, providerId = '
 
   // Fallback demo / rule-based AI
   const lowercasePrompt = prompt.toLowerCase();
-  let responseText = "I'm a demo AI teacher! You can ask me to explain concepts, give you a quiz, or help you build a study plan.";
+  let responseText = "Hello! I am your AI Teacher. I am currently running in offline fallback mode without an API key, but I am here to help you study.";
   
   if (lowercasePrompt.includes("what is this app") || lowercasePrompt.includes("about this app") || lowercasePrompt.includes("instructions")) {
     responseText = "This is Smart Learning! It's a personalized AI classroom where you can track your study sessions, test your knowledge with quizzes, and chat with me (your AI teacher) to clear your doubts. Try clicking '+ Start a focus session' on your dashboard!";

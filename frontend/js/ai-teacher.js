@@ -1,4 +1,4 @@
-import { getAccessToken } from './supabase.js';
+import { supabase, getAccessToken } from './supabase.js';
 
 const headers = () => {
   const token = getAccessToken();
@@ -8,76 +8,31 @@ const headers = () => {
 const chatMessages = document.getElementById('chat-messages');
 const chatInput = document.getElementById('chat-input');
 const sendBtn = document.getElementById('send-btn');
-const voiceBtn = document.getElementById('voice-btn');
-const autoSpeakToggle = document.getElementById('auto-speak-toggle');
-const providerLabel = document.getElementById('provider-label');
+let currentConversationId = null;
 
-let synth = window.speechSynthesis;
-let recognition = null;
-let isRecording = false;
-
-// Initialize Speech Recognition if supported
-if ('webkitSpeechRecognition' in window) {
-  recognition = new webkitSpeechRecognition();
-  recognition.continuous = false;
-  recognition.interimResults = true;
-  
-  recognition.onstart = () => {
-    isRecording = true;
-    voiceBtn.classList.add('recording');
-    chatInput.placeholder = 'Listening...';
-  };
-  
-  recognition.onresult = (event) => {
-    let interimTranscript = '';
-    let finalTranscript = '';
-    
-    for (let i = event.resultIndex; i < event.results.length; ++i) {
-      if (event.results[i].isFinal) {
-        finalTranscript += event.results[i][0].transcript;
-      } else {
-        interimTranscript += event.results[i][0].transcript;
-      }
-    }
-    
-    if (finalTranscript) {
-      chatInput.value += finalTranscript + ' ';
-    } else {
-      chatInput.value = interimTranscript;
-    }
-    adjustTextareaHeight();
-  };
-  
-  recognition.onerror = (e) => {
-    console.error('Speech recognition error', e);
-    stopRecording();
-  };
-  
-  recognition.onend = () => {
-    stopRecording();
-    if (chatInput.value.trim() !== '') {
-      sendMessage();
-    }
-  };
-} else {
-  voiceBtn.style.display = 'none';
+// Initialize marked options for safe code rendering
+if (window.marked) {
+  marked.setOptions({
+    breaks: true,
+    gfm: true,
+    headerIds: false
+  });
 }
 
-const stopRecording = () => {
-  isRecording = false;
-  voiceBtn.classList.remove('recording');
-  chatInput.placeholder = 'Type or say something...';
-  if (recognition) recognition.stop();
+// Ensure DOMPurify doesn't strip out classes needed for code blocks
+const sanitizeOptions = {
+  ALLOWED_TAGS: ['b', 'i', 'em', 'strong', 'a', 'p', 'br', 'ul', 'ol', 'li', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'code', 'pre', 'blockquote', 'span', 'div'],
+  ALLOWED_ATTR: ['href', 'class', 'target']
 };
 
-voiceBtn.onmousedown = () => { if(recognition) recognition.start(); };
-voiceBtn.onmouseup = () => stopRecording();
-voiceBtn.ontouchstart = (e) => { e.preventDefault(); if(recognition) recognition.start(); };
-voiceBtn.ontouchend = (e) => { e.preventDefault(); stopRecording(); };
+function scrollToBottom() {
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+}
 
 const adjustTextareaHeight = () => {
   chatInput.style.height = 'auto';
-  chatInput.style.height = (chatInput.scrollHeight) + 'px';
+  chatInput.style.height = (Math.min(chatInput.scrollHeight, 120)) + 'px';
+  sendBtn.disabled = chatInput.value.trim().length === 0;
 };
 
 chatInput.addEventListener('input', adjustTextareaHeight);
@@ -88,59 +43,114 @@ chatInput.addEventListener('keydown', (e) => {
   }
 });
 
-const appendMessage = (text, role, animate = false) => {
+function formatTime(dateString) {
+  const d = dateString ? new Date(dateString) : new Date();
+  return d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+}
+
+const appendMessage = (text, role, animate = false, timestamp = null) => {
+  const wrapper = document.createElement('div');
+  wrapper.className = `chat-bubble-wrapper ${role}`;
+  
   const bubble = document.createElement('div');
   bubble.className = `chat-bubble ${role}`;
-  bubble.innerHTML = text.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
   
-  if (role === 'ai') {
-    const ttsBtn = document.createElement('button');
-    ttsBtn.className = 'tts-btn';
-    ttsBtn.innerHTML = '🔊';
-    ttsBtn.onclick = () => speakText(text, ttsBtn);
-    bubble.appendChild(ttsBtn);
-    
-    if (autoSpeakToggle.checked) {
-      speakText(text, ttsBtn);
+  // Render Markdown if available
+  if (window.marked && window.DOMPurify) {
+    bubble.innerHTML = DOMPurify.sanitize(marked.parse(text), sanitizeOptions);
+  } else {
+    // Fallback if libs fail to load
+    bubble.innerHTML = text.replace(/\\n/g, '<br>');
+  }
+  
+  wrapper.appendChild(bubble);
+
+  const time = document.createElement('div');
+  time.className = 'chat-timestamp';
+  time.innerHTML = `${role === 'user' ? 'You' : 'AI Teacher'} &bull; ${formatTime(timestamp)}`;
+  wrapper.appendChild(time);
+  
+  chatMessages.appendChild(wrapper);
+  scrollToBottom();
+  return wrapper;
+};
+
+async function loadConversation() {
+  const { data: user } = await supabase.auth.getUser();
+  if (!user?.user) return;
+
+  // Try to find recent conversation
+  const { data: convs, error: convErr } = await supabase
+    .from('ai_conversations')
+    .select('id, title')
+    .eq('user_id', user.user.id)
+    .order('created_at', { ascending: false })
+    .limit(1);
+
+  if (convs && convs.length > 0) {
+    currentConversationId = convs[0].id;
+    // Load messages
+    const { data: messages } = await supabase
+      .from('ai_messages')
+      .select('role, content, created_at')
+      .eq('conversation_id', currentConversationId)
+      .order('created_at', { ascending: true });
+      
+    if (messages && messages.length > 0) {
+      // Clear the initial welcome message only if they have real history
+      chatMessages.innerHTML = ''; 
+      messages.forEach(msg => {
+        appendMessage(msg.content, msg.role, false, msg.created_at);
+      });
     }
+  } else {
+    // Create new conversation
+    const { data: newConv } = await supabase
+      .from('ai_conversations')
+      .insert([{ user_id: user.user.id, title: 'Study Session' }])
+      .select('id').single();
+      
+    if (newConv) currentConversationId = newConv.id;
   }
-  
-  chatMessages.appendChild(bubble);
-  chatMessages.scrollTop = chatMessages.scrollHeight;
-  return bubble;
-};
+  scrollToBottom();
+}
 
-const speakText = (text, btnElement) => {
-  if (synth.speaking) {
-    synth.cancel();
-    document.querySelectorAll('.tts-btn').forEach(b => b.classList.remove('playing'));
-    return;
-  }
-  
-  const plainText = text.replace(/[*#]/g, '');
-  const utterance = new SpeechSynthesisUtterance(plainText);
-  utterance.onstart = () => btnElement && btnElement.classList.add('playing');
-  utterance.onend = () => btnElement && btnElement.classList.remove('playing');
-  utterance.onerror = () => btnElement && btnElement.classList.remove('playing');
-  
-  synth.speak(utterance);
-};
-
-const sendMessage = async () => {
-  const text = chatInput.value.trim();
+const sendMessage = async (presetText = null) => {
+  const text = presetText || chatInput.value.trim();
   if (!text) return;
   
   chatInput.value = '';
-  chatInput.style.height = 'auto';
+  adjustTextareaHeight();
   sendBtn.disabled = true;
+  
+  // Remove welcome quick actions if present
+  const quickActions = document.querySelector('.quick-actions-container');
+  if (quickActions) quickActions.remove();
   
   appendMessage(text, 'user');
   
-  const typingBubble = document.createElement('div');
-  typingBubble.className = 'chat-bubble ai';
-  typingBubble.textContent = '...';
-  chatMessages.appendChild(typingBubble);
-  chatMessages.scrollTop = chatMessages.scrollHeight;
+  // Save user message to DB
+  if (currentConversationId) {
+    supabase.from('ai_messages').insert([{
+      conversation_id: currentConversationId,
+      role: 'user',
+      content: text
+    }]).then();
+  }
+  
+  // Typing indicator
+  const typingWrapper = document.createElement('div');
+  typingWrapper.className = 'chat-bubble-wrapper ai';
+  typingWrapper.id = 'typing-indicator';
+  typingWrapper.innerHTML = `
+    <div class="typing-indicator">
+      <div class="typing-dot"></div>
+      <div class="typing-dot"></div>
+      <div class="typing-dot"></div>
+    </div>
+  `;
+  chatMessages.appendChild(typingWrapper);
+  scrollToBottom();
   
   try {
     const res = await fetch('/api/ai/chat', {
@@ -152,24 +162,40 @@ const sendMessage = async () => {
     if (!res.ok) throw new Error('AI failed');
     const data = await res.json();
     
-    typingBubble.remove();
+    document.getElementById('typing-indicator')?.remove();
     appendMessage(data.text, 'ai');
-    providerLabel.textContent = data.provider;
+    
+    // Save AI message to DB
+    if (currentConversationId) {
+      supabase.from('ai_messages').insert([{
+        conversation_id: currentConversationId,
+        role: 'assistant',
+        content: data.text
+      }]).then();
+    }
+    
   } catch (error) {
     console.error(error);
-    typingBubble.textContent = 'Sorry, I am having trouble connecting to the AI gateway.';
-    typingBubble.classList.add('system');
-    typingBubble.classList.remove('ai');
+    document.getElementById('typing-indicator')?.remove();
+    appendMessage('Sorry, I am having trouble connecting to my brain right now. Please try again.', 'ai');
   } finally {
     sendBtn.disabled = false;
     chatInput.focus();
   }
 };
 
-sendBtn.onclick = sendMessage;
+sendBtn.onclick = () => sendMessage();
 
-// Fetch active provider
-fetch('/api/ai/providers', { headers: headers() })
-  .then(res => res.json())
-  .then(data => { if(data.active) providerLabel.textContent = data.active; })
-  .catch(e => console.error(e));
+// Handle quick actions
+document.addEventListener('click', (e) => {
+  const chip = e.target.closest('.quick-action-chip');
+  if (chip) {
+    const prompt = chip.getAttribute('data-prompt');
+    if (prompt) sendMessage(prompt);
+  }
+});
+
+// Init
+window.addEventListener('DOMContentLoaded', () => {
+  loadConversation();
+});
