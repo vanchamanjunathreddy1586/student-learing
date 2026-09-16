@@ -25,7 +25,11 @@ const getAdminSupabase = () => {
 
 import jwt from 'jsonwebtoken';
 
-const DIARY_SECRET = process.env.DIARY_JWT_SECRET || 'fallback-super-secret-diary-key-2026';
+const DIARY_SECRET = process.env.DIARY_JWT_SECRET;
+if (!DIARY_SECRET) {
+  console.error('CRITICAL ERROR: DIARY_JWT_SECRET is missing from environment variables.');
+  // Do not throw at startup to avoid crashing the whole app, but API routes will fail when trying to sign/verify.
+}
 const DIARY_EXPIRATION = '15m';
 
 function signDiaryToken(userId) {
@@ -107,7 +111,7 @@ router.post('/auth/login', async (req, res) => {
   
   if (error) return res.status(500).json({ error: "Failed to verify security status." });
   if (!acc) return res.status(404).json({ error: 'No Diary Account found.' });
-  if (acc.email !== email) return res.status(401).json({ error: 'Incorrect Diary email.' });
+  if (acc.email !== email) return res.status(401).json({ error: 'Invalid Diary credentials.' });
 
   if (acc.locked_until && new Date(acc.locked_until) > new Date()) {
     const diff = Math.ceil((new Date(acc.locked_until) - new Date()) / 1000);
@@ -128,7 +132,7 @@ router.post('/auth/login', async (req, res) => {
     if (locked_until) {
       return res.status(429).json({ error: 'Too many incorrect attempts. Try again in 30 seconds.', locked: true });
     } else {
-      return res.status(401).json({ error: 'Incorrect Diary password.' });
+      return res.status(401).json({ error: 'Invalid Diary credentials.' });
     }
   }
 

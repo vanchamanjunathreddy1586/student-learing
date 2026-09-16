@@ -566,7 +566,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   function loadEntry(entry) {
     currentEntryId = entry.id;
     titleInput.value = entry.title || '';
-    contentEditor.innerHTML = entry.content || '';
+    contentEditor.innerHTML = DOMPurify.sanitize(entry.content || '');
     currentMood = entry.mood;
     currentTags = entry.tags || [];
     isFavorite = entry.is_favorite || false;
