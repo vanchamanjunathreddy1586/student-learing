@@ -25,6 +25,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     return;
   }
 
+  const getHeaders = async () => ({
+    'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
+    'Content-Type': 'application/json'
+  });
+
   // --- Elements ---
   const saveStatus = document.getElementById('save-status');
   const titleInput = document.getElementById('diary-title');
@@ -288,10 +293,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   // --- API ---
-  const getHeaders = async () => ({
-    'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
-    'Content-Type': 'application/json'
-  });
 
   async function loadEntries(search = '') {
     try {
@@ -603,15 +604,19 @@ document.addEventListener('DOMContentLoaded', async () => {
       .replace(/'/g, "&#039;");
   }
 
-    // --- Initializing ---
+        // --- Initializing ---
     if(diaryLayout) {
       diaryLayout.style.opacity = '0';
       diaryLayout.style.pointerEvents = 'none';
     }
-    document.getElementById('loading-screen').style.display = 'none';
-    document.getElementById('app-shell').hidden = false;
     
-    checkLock();
+    async function startDiarySecurely() {
+        document.getElementById('loading-screen').style.display = 'none';
+        document.getElementById('app-shell').hidden = false;
+        await checkLock();
+    }
+    
+    await startDiarySecurely();
   } catch (globalErr) {
     console.error('DIARY INIT ERROR:', globalErr);
     document.getElementById('loading-screen').innerHTML = '<div style="color:red; padding: 20px;"><h3>Fatal Error</h3><p>' + globalErr.message + '</p><pre>' + globalErr.stack + '</pre></div>';
