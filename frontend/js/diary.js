@@ -53,51 +53,228 @@ document.addEventListener('DOMContentLoaded', async () => {
   let entries = [];
   let profile = null;
 
-  // --- Lock Mechanism ---
+  // --- Secure PIN Lock Mechanism ---
+  const lockTitle = document.getElementById('lock-title');
+  const lockSubtitle = document.getElementById('lock-subtitle');
+  const unlockBtn = document.getElementById('unlock-btn');
+  const cancelPinBtn = document.getElementById('cancel-pin-btn');
+  const forgotPinBtn = document.getElementById('forgot-pin-btn');
+  const lockDiaryBtn = document.getElementById('lock-diary-btn');
+  const changePinBtn = document.getElementById('change-pin-btn');
+  const pinErrorMsg = document.getElementById('pin-error-msg');
+  const pinInputs = Array.from(document.querySelectorAll('.pin-digit'));
+  const diaryLayout = document.querySelector('.diary-layout');
+  
+  let pinMode = 'verify';
+  let tempNewPin = '';
+  let autoLockTimer = null;
+  const INACTIVITY_LIMIT = 15 * 60 * 1000;
+
+  function resetInactivityTimer() {
+    clearTimeout(autoLockTimer);
+    autoLockTimer = setTimeout(() => {
+      if (lockOverlay.style.display === 'none') {
+        showToast('Diary auto-locked due to inactivity', 'info');
+        lockDiary();
+      }
+    }, INACTIVITY_LIMIT);
+  }
+
+  ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart'].forEach(evt => {
+    document.addEventListener(evt, resetInactivityTimer, true);
+  });
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden' && lockOverlay.style.display === 'none') {
+      lockDiary();
+    }
+  });
+
+  function clearPins() {
+    pinInputs.forEach(p => p.value = '');
+    pinInputs[0].focus();
+  }
+
+  function getPinValue() {
+    return pinInputs.map(p => p.value).join('');
+  }
+
+  pinInputs.forEach((pin, idx) => {
+    pin.addEventListener('input', () => {
+      if (pin.value && idx < pinInputs.length - 1) pinInputs[idx + 1].focus();
+    });
+    pin.addEventListener('keydown', (e) => {
+      if (e.key === 'Backspace' && !pin.value && idx > 0) pinInputs[idx - 1].focus();
+      if (e.key === 'Enter') unlockBtn.click();
+    });
+    pin.addEventListener('paste', (e) => {
+      e.preventDefault();
+      const pasted = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g, '').slice(0, 6);
+      [...pasted].forEach((char, i) => { if (pinInputs[i]) pinInputs[i].value = char; });
+      if (pasted.length > 0) pinInputs[Math.min(pasted.length, 5)].focus();
+    });
+  });
+
   async function checkLock() {
-    const { data } = await supabase.from('student_profiles').select('diary_pin_hash').eq('id', user.id).single();
-    profile = data;
-    if (data?.diary_pin_hash) {
-      lockOverlay.classList.remove('hidden');
-      setupPinLock(data.diary_pin_hash);
-    } else {
-      lockOverlay.classList.add('hidden');
-      initDiary();
+    try {
+      const res = await fetch('/api/diary/pin/status', { headers: await getHeaders() });
+      if (!res.ok) throw new Error('Failed to fetch PIN status');
+      const { hasPin } = await res.json();
+      
+      if (!hasPin) {
+        pinMode = 'setup';
+        showLockScreen('🔐 Secure Your Personal Diary', 'Create a private 4-6 digit PIN to protect your diary.', false);
+      } else {
+        lockDiary();
+      }
+    } catch (err) {
+      console.error('Lock check failed:', err);
+      showToast('Security check failed', 'error');
     }
   }
 
-  function setupPinLock(correctHash) {
-    const pins = [
-      document.getElementById('pin-1'),
-      document.getElementById('pin-2'),
-      document.getElementById('pin-3'),
-      document.getElementById('pin-4')
-    ];
-    const unlockBtn = document.getElementById('unlock-btn');
+  function lockDiary() {
+    pinMode = 'verify';
+    showLockScreen('🔐 Personal Diary Locked', 'Enter your PIN to continue', false);
+    if(diaryLayout) diaryLayout.style.opacity = '0';
+    if(diaryLayout) diaryLayout.style.pointerEvents = 'none';
+    if(lockDiaryBtn) lockDiaryBtn.style.display = 'none';
+  }
 
-    pins.forEach((pin, idx) => {
-      pin.addEventListener('input', () => {
-        if (pin.value && idx < 3) pins[idx + 1].focus();
-      });
-      pin.addEventListener('keydown', (e) => {
-        if (e.key === 'Backspace' && !pin.value && idx > 0) pins[idx - 1].focus();
-      });
-    });
+  function showLockScreen(title, subtitle, canCancel = false) {
+    lockOverlay.style.display = 'flex';
+    if(lockTitle) lockTitle.textContent = title;
+    if(lockSubtitle) lockSubtitle.textContent = subtitle;
+    if(cancelPinBtn) cancelPinBtn.style.display = canCancel ? 'block' : 'none';
+    if(forgotPinBtn) forgotPinBtn.style.display = pinMode === 'verify' ? 'block' : 'none';
+    if(unlockBtn) unlockBtn.textContent = pinMode === 'verify' ? 'Unlock' : (pinMode === 'setup' ? 'Create PIN' : 'Continue');
+    if(pinErrorMsg) pinErrorMsg.textContent = '';
+    clearPins();
+    resetInactivityTimer();
+  }
 
-    unlockBtn.addEventListener('click', () => {
-      const enteredPin = pins.map(p => p.value).join('');
-      // In a real app we'd hash the enteredPin and compare. For this demo, simple equality if hash is plain.
-      // (Assuming the settings page saves it as plain for now since we have no backend hashing route).
-      if (enteredPin === correctHash) {
-        lockOverlay.classList.add('hidden');
-        initDiary();
-      } else {
-        showToast('Incorrect PIN', 'error');
-        pins.forEach(p => p.value = '');
-        pins[0].focus();
+  if(cancelPinBtn) {
+    cancelPinBtn.addEventListener('click', () => {
+      if (pinMode === 'change_old' || pinMode === 'change_new' || pinMode === 'change_confirm') {
+        unlockDiary();
       }
     });
   }
+
+  if(forgotPinBtn) {
+    forgotPinBtn.addEventListener('click', () => {
+      alert('Account recovery is required to reset your PIN. Please contact support or go to Account Settings.');
+    });
+  }
+
+  if (lockDiaryBtn) lockDiaryBtn.addEventListener('click', () => lockDiary());
+
+  if (changePinBtn) {
+    changePinBtn.addEventListener('click', () => {
+      pinMode = 'change_old';
+      showLockScreen('🔑 Change PIN', 'Enter your CURRENT PIN', true);
+    });
+  }
+
+  if(unlockBtn) {
+    unlockBtn.addEventListener('click', async () => {
+      const pin = getPinValue();
+      if (pin.length < 4) {
+        pinErrorMsg.textContent = 'PIN must be at least 4 digits.';
+        return;
+      }
+  
+      pinErrorMsg.textContent = '';
+      unlockBtn.disabled = true;
+      unlockBtn.textContent = 'Wait...';
+  
+      try {
+        if (pinMode === 'setup') {
+          const res = await fetch('/api/diary/pin/setup', {
+            method: 'POST',
+            headers: await getHeaders(),
+            body: JSON.stringify({ pin })
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || 'Failed to setup PIN');
+          
+          showToast('PIN securely created!', 'success');
+          unlockDiary();
+          initDiary();
+        } 
+        else if (pinMode === 'verify') {
+          const res = await fetch('/api/diary/pin/verify', {
+            method: 'POST',
+            headers: await getHeaders(),
+            body: JSON.stringify({ pin })
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || 'Incorrect PIN');
+          
+          unlockDiary();
+          initDiary();
+        }
+        else if (pinMode === 'change_old') {
+          const res = await fetch('/api/diary/pin/verify', {
+            method: 'POST',
+            headers: await getHeaders(),
+            body: JSON.stringify({ pin })
+          });
+          if (!res.ok) {
+            const data = await res.json();
+            throw new Error(data.error || 'Incorrect current PIN');
+          }
+          window._tempOldPin = pin;
+          pinMode = 'change_new';
+          showLockScreen('🔑 New PIN', 'Enter your NEW 4-6 digit PIN', true);
+        }
+        else if (pinMode === 'change_new') {
+          const invalidPins = ['0000', '000000', '1111', '111111', '1234', '123456'];
+          if (invalidPins.includes(pin)) throw new Error('Please choose a stronger PIN.');
+          
+          tempNewPin = pin;
+          pinMode = 'change_confirm';
+          showLockScreen('🔑 Confirm PIN', 'Re-enter your NEW PIN', true);
+        }
+        else if (pinMode === 'change_confirm') {
+          if (pin !== tempNewPin) {
+            pinMode = 'change_new';
+            showLockScreen('🔑 New PIN', 'PINs did not match. Enter NEW PIN again', true);
+            throw new Error('PINs do not match.');
+          }
+          const res = await fetch('/api/diary/pin/change', {
+            method: 'POST',
+            headers: await getHeaders(),
+            body: JSON.stringify({ currentPin: window._tempOldPin, newPin: pin })
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || 'Failed to change PIN');
+          
+          window._tempOldPin = null;
+          tempNewPin = null;
+          showToast('PIN successfully changed!', 'success');
+          unlockDiary();
+        }
+      } catch (err) {
+        pinErrorMsg.textContent = err.message;
+        clearPins();
+      } finally {
+        unlockBtn.disabled = false;
+        unlockBtn.textContent = pinMode === 'verify' ? 'Unlock' : (pinMode === 'setup' ? 'Create PIN' : 'Continue');
+      }
+    });
+  }
+
+  function unlockDiary() {
+    lockOverlay.style.display = 'none';
+    if(diaryLayout) {
+      diaryLayout.style.opacity = '1';
+      diaryLayout.style.pointerEvents = 'auto';
+    }
+    if(lockDiaryBtn) lockDiaryBtn.style.display = 'inline-block';
+    resetInactivityTimer();
+  }
+  // --- End Lock Mechanism ---
 
   async function initDiary() {
     await loadEntries();
@@ -427,6 +604,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
     // --- Initializing ---
+    if(diaryLayout) {
+      diaryLayout.style.opacity = '0';
+      diaryLayout.style.pointerEvents = 'none';
+    }
     document.getElementById('loading-screen').style.display = 'none';
     document.getElementById('app-shell').hidden = false;
     
