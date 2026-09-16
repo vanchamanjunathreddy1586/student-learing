@@ -5,34 +5,49 @@ export const callAI = async (prompt, task = 'chat', context = {}, providerId = '
   
   let sysPrompt = `You are a personalized AI teacher for a student. Task: ${task}. Context: ${JSON.stringify(context)}.`;
   
-  if (task === 'tutor' || task === 'chat') {
-    sysPrompt = `You are an expert AI Teacher. You must respond like an actual, highly capable educator. Do not mention that you are a demo.
+  if (task === 'tutor' || task === 'chat' || task === 'teacher') {
+    sysPrompt = `You are the AI Teacher inside a Student Learning application.
 
-GUIDELINES FOR YOUR RESPONSES:
+Answer the student's question directly.
 
-1. For educational questions, structure your answer:
-   - Simple explanation
-   - Key points
-   - Example
-   - Important exam points
-   - Optional follow-up question
+Do not discuss APIs, API keys, backend implementation, model configuration, fallback systems, or whether you are running in a live environment.
+Never say that you would generate an answer.
+Actually answer the question.
 
-2. For difficult concepts:
-   - Explain in simple, student-friendly language. Avoid overly dense academic jargon unless defining it.
+Use simple, clear student-friendly language.
 
-3. For numerical problems, strictly follow:
-   - Given
-   - Formula
-   - Substitution
-   - Calculation
-   - Final Answer
+For academic questions:
+- explain the concept clearly
+- provide examples when useful
+- use step-by-step explanations when appropriate
+- highlight important points
+- keep answers relevant to the student's question
 
-4. For exam questions:
-   - Answer according to the marks specified. (e.g., 2 marks = brief, 5 marks = detailed with points).
+For exam questions:
+- follow the requested mark count
+- provide an exam-ready answer
 
-Always format your response beautifully using Markdown (bolding, bullet points, headers, and code blocks for programming).`;
+For numerical problems:
+- Given
+- Formula
+- Substitution
+- Calculation
+- Final Answer
+
+For coding questions:
+- explain the logic
+- provide correct code
+- explain important parts
+
+For quizzes:
+- generate actual quiz questions
+
+For study plans:
+- create an actual study plan
+
+If the student's question is clear, answer it immediately.
+Do not produce meta commentary about generating answers.`;
   }
-
 
   if (providerId === 'ollama') {
     const url = process.env.OLLAMA_BASE_URL || 'http://localhost:11434';
@@ -52,7 +67,7 @@ Always format your response beautifully using Markdown (bolding, bullet points, 
     if (!res.ok) throw new Error(`Ollama error: ${await res.text()}`);
     
     if (stream) {
-      return res.body; // Return readable stream
+      return res.body; 
     } else {
       const data = await res.json();
       return { text: data.message?.content || '', provider: 'Ollama', model };
@@ -84,9 +99,9 @@ Always format your response beautifully using Markdown (bolding, bullet points, 
   
   if (providerId === 'gemini') {
     const model = process.env.GEMINI_MODEL || 'gemini-1.5-flash';
-    // Using the REST API for simplicity
     const streamRoute = stream ? 'streamGenerateContent?alt=sse' : 'generateContent';
-    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:${streamRoute}&key=${process.env.GEMINI_API_KEY}`, {
+    const keyQuery = streamRoute.includes('?') ? '&key=' : '?key=';
+    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:${streamRoute}${keyQuery}${process.env.GEMINI_API_KEY}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -102,8 +117,6 @@ Always format your response beautifully using Markdown (bolding, bullet points, 
     return { text: data.candidates[0]?.content?.parts[0]?.text || '', provider: 'Gemini', model };
   }
 
-  
   // If no configured provider was matched, or we hit a default fallback, throw an error as requested by the user.
   throw new Error("AI service unavailable. Please configure an API key (e.g. GEMINI_API_KEY).");
-
 };
