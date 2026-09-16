@@ -30,36 +30,53 @@
 
     const resolved = resolveTheme(selected);
 
-    document.documentElement.dataset.theme = resolved;
-    document.documentElement.dataset.themePreference = selected;
+    document.documentElement.setAttribute(
+      'data-theme',
+      resolved
+    );
+
+    document.documentElement.setAttribute(
+      'data-theme-preference',
+      selected
+    );
 
     if (persist) {
       try {
         localStorage.setItem(STORAGE_KEY, selected);
-      } catch (error) {}
+      } catch (error) {
+        console.warn('Theme storage unavailable');
+      }
     }
 
     return resolved;
   }
 
-  window.slSetTheme = function(theme) {
+  window.slSetTheme = function (theme) {
     return applyTheme(theme, true);
   };
 
-  window.slGetTheme = function() {
-    return document.documentElement.dataset.themePreference || getStoredTheme();
+  window.slGetTheme = function () {
+    return (
+      document.documentElement.getAttribute(
+        'data-theme-preference'
+      ) || getStoredTheme()
+    );
   };
 
-  window.slInitTheme = function() {
+  window.slInitTheme = function () {
     return applyTheme(getStoredTheme(), false);
   };
 
+  // Apply saved theme immediately
   applyTheme(getStoredTheme(), false);
 
+  // Handle system theme changes
   if (window.matchMedia) {
-    const media = window.matchMedia('(prefers-color-scheme: light)');
+    const media = window.matchMedia(
+      '(prefers-color-scheme: light)'
+    );
 
-    const handleChange = function() {
+    const handleChange = function () {
       if (window.slGetTheme() === 'system') {
         applyTheme('system', false);
       }
@@ -71,4 +88,5 @@
       media.addListener(handleChange);
     }
   }
+
 })();
