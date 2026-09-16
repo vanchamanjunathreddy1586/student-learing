@@ -1,40 +1,74 @@
-// Global Theme Manager (Lightweight)
-// Runs synchronously in the <head> to prevent FOUC (Flash of Unstyled Content)
+(function () {
+  'use strict';
 
-(function() {
   const STORAGE_KEY = 'smart-learning-theme';
+  const VALID_THEMES = ['dark', 'light', 'system'];
 
-  window.slGetTheme = () => {
-    return localStorage.getItem(STORAGE_KEY) || 'system';
-  };
-
-  window.slInitTheme = () => {
-    const savedTheme = window.slGetTheme();
-    window.slSetTheme(savedTheme, true); // true = init phase, don't re-save if not needed
-    
-    // Setup listener for OS changes
-    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
-      if (window.slGetTheme() === 'system') {
-        window.slSetTheme('system', true);
-      }
-    });
-  };
-
-  window.slSetTheme = (theme, isInit = false) => {
-    // 1. Store locally if it's an explicit user action
-    if (!isInit) {
-      localStorage.setItem(STORAGE_KEY, theme);
+  function getStoredTheme() {
+    try {
+      const value = localStorage.getItem(STORAGE_KEY);
+      return VALID_THEMES.includes(value) ? value : 'dark';
+    } catch (error) {
+      return 'dark';
     }
+  }
 
-    // 2. Apply theme logic
+  function resolveTheme(theme) {
     if (theme === 'system') {
-      const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      document.documentElement.dataset.theme = isDark ? 'dark' : 'light';
-    } else {
-      document.documentElement.dataset.theme = theme;
+      return window.matchMedia &&
+        window.matchMedia('(prefers-color-scheme: light)').matches
+        ? 'light'
+        : 'dark';
     }
+
+    return theme === 'light' ? 'light' : 'dark';
+  }
+
+  function applyTheme(theme, persist = true) {
+    const selected =
+      VALID_THEMES.includes(theme) ? theme : 'dark';
+
+    const resolved = resolveTheme(selected);
+
+    document.documentElement.dataset.theme = resolved;
+    document.documentElement.dataset.themePreference = selected;
+
+    if (persist) {
+      try {
+        localStorage.setItem(STORAGE_KEY, selected);
+      } catch (error) {}
+    }
+
+    return resolved;
+  }
+
+  window.slSetTheme = function(theme) {
+    return applyTheme(theme, true);
   };
 
-  // Run initialization immediately!
-  window.slInitTheme();
+  window.slGetTheme = function() {
+    return document.documentElement.dataset.themePreference || getStoredTheme();
+  };
+
+  window.slInitTheme = function() {
+    return applyTheme(getStoredTheme(), false);
+  };
+
+  applyTheme(getStoredTheme(), false);
+
+  if (window.matchMedia) {
+    const media = window.matchMedia('(prefers-color-scheme: light)');
+
+    const handleChange = function() {
+      if (window.slGetTheme() === 'system') {
+        applyTheme('system', false);
+      }
+    };
+
+    if (media.addEventListener) {
+      media.addEventListener('change', handleChange);
+    } else if (media.addListener) {
+      media.addListener(handleChange);
+    }
+  }
 })();
