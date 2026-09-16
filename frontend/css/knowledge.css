@@ -11,9 +11,9 @@
 .kv-explorer {
   width: 250px;
   min-width: 250px;
-  background: var(--t-panel);
+  background: var(--surface);
   border-radius: var(--t-radius);
-  border: var(--t-border);
+  border: var(--border);
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -21,7 +21,7 @@
 
 .explorer-header {
   padding: 12px;
-  border-bottom: var(--t-border);
+  border-bottom: var(--border);
   display: flex;
   gap: 8px;
   align-items: center;
@@ -36,9 +36,9 @@
   width: 100%;
   padding: 6px 8px 6px 30px;
   border-radius: var(--t-radius);
-  border: var(--t-border);
-  background: var(--t-bg);
-  color: var(--t-text);
+  border: var(--border);
+  background: var(--bg-primary);
+  color: var(--text-primary);
   font-size: 13px;
 }
 
@@ -47,7 +47,7 @@
   left: 10px;
   top: 50%;
   transform: translateY(-50%);
-  color: var(--t-muted);
+  color: var(--text-secondary);
   font-size: 13px;
 }
 
@@ -64,7 +64,7 @@
 .explorer-section h4 {
   font-size: 12px;
   text-transform: uppercase;
-  color: var(--t-muted);
+  color: var(--text-secondary);
   margin-bottom: 8px;
   display: flex;
   align-items: center;
@@ -83,7 +83,7 @@
   border-radius: 4px;
   cursor: pointer;
   font-size: 14px;
-  color: var(--t-text);
+  color: var(--text-primary);
   transition: all 0.2s;
   white-space: nowrap;
   overflow: hidden;
@@ -91,20 +91,20 @@
 }
 
 .explorer-list li:hover {
-  background: var(--t-bg);
+  background: var(--bg-primary);
 }
 
 .explorer-list li.active {
-  background: var(--t-primary);
+  background: var(--accent);
   color: white;
 }
 
 /* Center Editor Panel */
 .kv-editor-panel {
   flex-grow: 1;
-  background: var(--t-panel);
+  background: var(--surface);
   border-radius: var(--t-radius);
-  border: var(--t-border);
+  border: var(--border);
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -115,7 +115,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 16px 24px;
-  border-bottom: var(--t-border);
+  border-bottom: var(--border);
 }
 
 .note-title-input {
@@ -124,7 +124,7 @@
   font-weight: 700;
   background: transparent;
   border: none;
-  color: var(--t-text);
+  color: var(--text-primary);
   outline: none;
 }
 
@@ -136,15 +136,15 @@
 
 .save-status {
   font-size: 13px;
-  color: var(--t-muted);
+  color: var(--text-secondary);
 }
 .save-status.saving { color: var(--t-warning); }
 .save-status.saved { color: var(--t-success); }
 
 .editor-toolbar {
   padding: 8px 24px;
-  background: var(--t-bg);
-  border-bottom: var(--t-border);
+  background: var(--bg-primary);
+  border-bottom: var(--border);
   display: flex;
   gap: 8px;
   align-items: center;
@@ -153,7 +153,7 @@
 .tool-btn {
   background: transparent;
   border: none;
-  color: var(--t-text);
+  color: var(--text-primary);
   cursor: pointer;
   padding: 6px 8px;
   border-radius: 4px;
@@ -161,7 +161,7 @@
 }
 
 .tool-btn:hover {
-  background: var(--t-panel);
+  background: var(--surface);
 }
 
 .ai-btn {
@@ -188,14 +188,14 @@
 
 .note-rich-content[placeholder]:empty:before {
   content: attr(placeholder);
-  color: var(--t-muted);
+  color: var(--text-secondary);
   opacity: 0.5;
   pointer-events: none;
 }
 
 /* Internal Note Links */
 .note-link {
-  color: var(--t-primary);
+  color: var(--accent);
   text-decoration: underline;
   cursor: pointer;
   font-weight: 500;
@@ -204,8 +204,8 @@
 /* Link Suggestions Dropdown */
 .link-suggestions {
   position: absolute;
-  background: var(--t-panel);
-  border: var(--t-border);
+  background: var(--surface);
+  border: var(--border);
   border-radius: var(--t-radius);
   box-shadow: 0 4px 12px rgba(0,0,0,0.2);
   width: 250px;
@@ -218,11 +218,11 @@
 .suggestion-item {
   padding: 8px 12px;
   cursor: pointer;
-  border-bottom: var(--t-border);
+  border-bottom: var(--border);
 }
 .suggestion-item:last-child { border-bottom: none; }
 .suggestion-item:hover, .suggestion-item.active {
-  background: var(--t-primary);
+  background: var(--accent);
   color: white;
 }
 
@@ -230,9 +230,9 @@
 .kv-context-panel {
   width: 250px;
   min-width: 250px;
-  background: var(--t-panel);
+  background: var(--surface);
   border-radius: var(--t-radius);
-  border: var(--t-border);
+  border: var(--border);
   padding: 16px;
   display: flex;
   flex-direction: column;
@@ -243,7 +243,7 @@
 .context-section h3 {
   font-size: 14px;
   margin-bottom: 12px;
-  color: var(--t-muted);
+  color: var(--text-secondary);
   display: flex;
   align-items: center;
   gap: 8px;
@@ -257,17 +257,17 @@
 
 .context-list li {
   padding: 8px;
-  background: var(--t-bg);
+  background: var(--bg-primary);
   border-radius: 4px;
   margin-bottom: 8px;
   font-size: 13px;
   cursor: pointer;
-  border-left: 3px solid var(--t-primary);
+  border-left: 3px solid var(--accent);
 }
 .context-list li:hover { opacity: 0.9; }
 
 .flashcards-preview {
-  background: var(--t-bg);
+  background: var(--bg-primary);
   padding: 12px;
   border-radius: var(--t-radius);
   font-size: 13px;
@@ -280,14 +280,14 @@
   gap: 6px;
 }
 .tag-pill {
-  background: var(--t-bg);
+  background: var(--bg-primary);
   padding: 2px 8px;
   border-radius: 12px;
   font-size: 12px;
-  color: var(--t-text);
+  color: var(--text-primary);
   cursor: pointer;
 }
-.tag-pill:hover { background: var(--t-primary); color: white; }
+.tag-pill:hover { background: var(--accent); color: white; }
 
 /* AI Modal */
 .ai-actions-grid {
@@ -297,7 +297,7 @@
   margin-bottom: 20px;
 }
 .ai-response-area {
-  background: var(--t-bg);
+  background: var(--bg-primary);
   padding: 16px;
   border-radius: var(--t-radius);
   white-space: pre-wrap;

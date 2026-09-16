@@ -8,8 +8,8 @@
 
 /* Dashboard Home Card */
 .diary-dashboard-card {
-  background: var(--t-panel);
-  border: var(--t-border);
+  background: var(--surface);
+  border: var(--border);
   border-radius: var(--t-radius);
   padding: 24px;
   display: flex;
@@ -23,7 +23,7 @@
   position: absolute;
   top: 0; left: 0;
   width: 4px; height: 100%;
-  background: var(--t-primary);
+  background: var(--accent);
   border-radius: 4px 0 0 4px;
 }
 .diary-stat-row {
@@ -37,13 +37,13 @@
 }
 .diary-stat span {
   font-size: 12px;
-  color: var(--t-muted);
+  color: var(--text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 .diary-stat strong {
   font-size: 18px;
-  color: var(--t-text);
+  color: var(--text-primary);
 }
 
 /* Diary Grid Layout */
@@ -66,8 +66,8 @@
   gap: 24px;
 }
 .diary-panel {
-  background: var(--t-panel);
-  border: var(--t-border);
+  background: var(--surface);
+  border: var(--border);
   border-radius: var(--t-radius);
   padding: 20px;
 }
@@ -75,16 +75,16 @@
   width: 100%;
   padding: 12px 16px;
   border-radius: var(--t-radius);
-  border: 1px solid var(--t-border);
-  background: var(--t-bg);
-  color: var(--t-text);
+  border: 1px solid var(--border);
+  background: var(--bg-primary);
+  color: var(--text-primary);
   font-family: inherit;
   margin-bottom: 16px;
   outline: none;
   transition: border-color 0.2s;
 }
 .diary-search-input:focus {
-  border-color: var(--t-primary);
+  border-color: var(--accent);
 }
 
 /* Calendar */
@@ -97,7 +97,7 @@
 }
 .calendar-day-header {
   font-size: 11px;
-  color: var(--t-muted);
+  color: var(--text-secondary);
   font-weight: 600;
   margin-bottom: 8px;
 }
@@ -109,11 +109,11 @@
   font-size: 13px;
   border-radius: 50%;
   cursor: pointer;
-  color: var(--t-text);
+  color: var(--text-primary);
   position: relative;
 }
 .calendar-day:hover {
-  background: var(--t-bg);
+  background: var(--bg-primary);
 }
 .calendar-day.has-entry::after {
   content: '';
@@ -122,17 +122,17 @@
   width: 4px;
   height: 4px;
   border-radius: 50%;
-  background: var(--t-primary);
+  background: var(--accent);
 }
 .calendar-day.active {
-  background: var(--t-primary);
+  background: var(--accent);
   color: white;
 }
 
 /* Editor Area */
 .diary-editor-panel {
-  background: var(--t-panel);
-  border: var(--t-border);
+  background: var(--surface);
+  border: var(--border);
   border-radius: var(--t-radius);
   padding: 32px;
   min-height: 600px;
@@ -146,7 +146,7 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 24px;
-  border-bottom: 1px solid var(--t-border);
+  border-bottom: 1px solid var(--border);
   padding-bottom: 16px;
 }
 .editor-meta {
@@ -156,12 +156,12 @@
 }
 .editor-date {
   font-size: 14px;
-  color: var(--t-muted);
+  color: var(--text-secondary);
   font-weight: 500;
 }
 .save-status {
   font-size: 12px;
-  color: var(--t-muted);
+  color: var(--text-secondary);
   display: flex;
   align-items: center;
   gap: 6px;
@@ -190,7 +190,7 @@
 .icon-btn-diary {
   background: transparent;
   border: none;
-  color: var(--t-muted);
+  color: var(--text-secondary);
   cursor: pointer;
   padding: 8px;
   border-radius: 6px;
@@ -200,8 +200,8 @@
   justify-content: center;
 }
 .icon-btn-diary:hover {
-  background: var(--t-bg);
-  color: var(--t-text);
+  background: var(--bg-primary);
+  color: var(--text-primary);
 }
 .icon-btn-diary.active-star {
   color: #ffcc00;
@@ -212,10 +212,10 @@
   display: flex;
   gap: 4px;
   padding: 8px;
-  background: var(--t-bg);
+  background: var(--bg-primary);
   border-radius: 8px;
   margin-bottom: 16px;
-  border: 1px solid var(--t-border);
+  border: 1px solid var(--border);
   flex-wrap: wrap;
 }
 .toolbar-btn {
@@ -228,10 +228,10 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  color: var(--t-text);
+  color: var(--text-primary);
 }
 .toolbar-btn:hover {
-  background: var(--t-panel);
+  background: var(--surface);
 }
 
 /* Title & Content */
@@ -240,14 +240,14 @@
   font-weight: 700;
   border: none;
   background: transparent;
-  color: var(--t-text);
+  color: var(--text-primary);
   width: 100%;
   outline: none;
   font-family: 'Space Grotesk', sans-serif;
   margin-bottom: 16px;
 }
 .diary-title-input::placeholder {
-  color: var(--t-muted);
+  color: var(--text-secondary);
   opacity: 0.5;
 }
 
@@ -256,13 +256,13 @@
   outline: none;
   font-size: 16px;
   line-height: 1.8;
-  color: var(--t-text);
+  color: var(--text-primary);
   padding: 8px 0;
   min-height: 200px;
 }
 .diary-rich-content[placeholder]:empty:before {
   content: attr(placeholder);
-  color: var(--t-muted);
+  color: var(--text-secondary);
   opacity: 0.5;
   pointer-events: none;
 }
@@ -278,10 +278,10 @@
   margin-bottom: 1em;
 }
 .diary-rich-content blockquote {
-  border-left: 3px solid var(--t-primary);
+  border-left: 3px solid var(--accent);
   margin: 1em 0;
   padding-left: 16px;
-  color: var(--t-muted);
+  color: var(--text-secondary);
   font-style: italic;
 }
 
@@ -293,23 +293,23 @@
   flex-wrap: wrap;
 }
 .mood-btn {
-  background: var(--t-bg);
-  border: 1px solid var(--t-border);
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
   padding: 6px 12px;
   border-radius: 20px;
   cursor: pointer;
   font-size: 14px;
-  color: var(--t-text);
+  color: var(--text-primary);
   transition: all 0.2s;
 }
 .mood-btn:hover {
-  background: var(--t-panel);
-  border-color: var(--t-primary);
+  background: var(--surface);
+  border-color: var(--accent);
 }
 .mood-btn.selected {
-  background: var(--t-primary);
+  background: var(--accent);
   color: white;
-  border-color: var(--t-primary);
+  border-color: var(--accent);
 }
 
 .tags-input-container {
@@ -318,13 +318,13 @@
   gap: 8px;
   flex-wrap: wrap;
   padding: 8px 12px;
-  background: var(--t-bg);
+  background: var(--bg-primary);
   border-radius: 8px;
-  border: 1px solid var(--t-border);
+  border: 1px solid var(--border);
   margin-top: auto;
 }
 .tag-chip {
-  background: var(--t-panel);
+  background: var(--surface);
   font-size: 12px;
   padding: 4px 10px;
   border-radius: 12px;
@@ -344,7 +344,7 @@
   border: none;
   background: transparent;
   outline: none;
-  color: var(--t-text);
+  color: var(--text-primary);
   font-size: 14px;
   flex-grow: 1;
   min-width: 120px;
@@ -359,29 +359,29 @@
 .entry-card {
   padding: 16px;
   border-radius: var(--t-radius);
-  background: var(--t-bg);
+  background: var(--bg-primary);
   border: 1px solid transparent;
   cursor: pointer;
   transition: all 0.2s;
 }
 .entry-card:hover {
-  border-color: var(--t-primary);
+  border-color: var(--accent);
   transform: translateY(-2px);
 }
 .entry-card.active {
-  border-color: var(--t-primary);
-  background: var(--t-panel);
+  border-color: var(--accent);
+  background: var(--surface);
   box-shadow: 0 4px 12px rgba(0,0,0,0.05);
 }
 .entry-card h4 {
   margin: 0 0 4px 0;
   font-size: 15px;
-  color: var(--t-text);
+  color: var(--text-primary);
 }
 .entry-card p {
   margin: 0;
   font-size: 13px;
-  color: var(--t-muted);
+  color: var(--text-secondary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -391,14 +391,14 @@
   justify-content: space-between;
   margin-top: 8px;
   font-size: 11px;
-  color: var(--t-muted);
+  color: var(--text-secondary);
 }
 
 /* Lock Screen */
 .diary-lock-overlay {
   position: absolute;
   top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(var(--t-bg-rgb, 255,255,255), 0.95);
+  background: rgba(var(--bg-primary-rgb, 255,255,255), 0.95);
   backdrop-filter: blur(10px);
   z-index: 100;
   display: flex;
@@ -427,20 +427,20 @@
   font-size: 24px;
   text-align: center;
   border-radius: 8px;
-  border: 1px solid var(--t-border);
-  background: var(--t-panel);
-  color: var(--t-text);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-primary);
   outline: none;
 }
 .pin-digit:focus {
-  border-color: var(--t-primary);
+  border-color: var(--accent);
 }
 
 /* AI Assistant Panel */
 .ai-diary-panel {
   margin-top: 16px;
-  background: linear-gradient(145deg, rgba(var(--t-primary-rgb, 0,122,255), 0.05), transparent);
-  border: 1px solid var(--t-primary);
+  background: linear-gradient(145deg, rgba(var(--accent-rgb, 0,122,255), 0.05), transparent);
+  border: 1px solid var(--accent);
   border-radius: var(--t-radius);
   padding: 16px;
   display: none; /* hidden by default */
@@ -456,8 +456,8 @@
   margin-top: 12px;
 }
 .ai-chip {
-  background: var(--t-panel);
-  border: 1px solid var(--t-border);
+  background: var(--surface);
+  border: 1px solid var(--border);
   padding: 6px 12px;
   border-radius: 16px;
   font-size: 12px;
@@ -467,13 +467,13 @@
   gap: 4px;
 }
 .ai-chip:hover {
-  border-color: var(--t-primary);
-  color: var(--t-primary);
+  border-color: var(--accent);
+  color: var(--accent);
 }
 .ai-result {
   margin-top: 16px;
   padding: 12px;
-  background: var(--t-bg);
+  background: var(--bg-primary);
   border-radius: 8px;
   font-size: 14px;
   line-height: 1.6;

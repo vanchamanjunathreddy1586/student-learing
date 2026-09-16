@@ -1,32 +1,4 @@
-// ==========================================
-// GLOBAL THEME MANAGER
-// ==========================================
-(function initTheme() {
-  const savedTheme = localStorage.getItem('sl_theme') || 'system';
-  
-  const applyTheme = (theme) => {
-    if (theme === 'system') {
-      const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      document.documentElement.dataset.theme = isDark ? 'dark' : 'light';
-    } else {
-      document.documentElement.dataset.theme = theme;
-    }
-  };
-  
-  // Listen for OS/System theme changes
-  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
-    if (localStorage.getItem('sl_theme') === 'system') applyTheme('system');
-  });
 
-  // Apply immediately to prevent flashing
-  applyTheme(savedTheme);
-  
-  // Expose globally for settings.js to use
-  window.slSetTheme = (newTheme) => {
-    localStorage.setItem('sl_theme', newTheme);
-    applyTheme(newTheme);
-  };
-})();
 
 import { getAccessToken } from './supabase.js';
 
