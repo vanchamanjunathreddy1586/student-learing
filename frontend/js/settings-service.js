@@ -42,7 +42,15 @@ export const saveSettings = async (userId, settings) => {
   if (!supabase) throw new Error('Supabase is not configured.');
   const payload = { ...mergeSettings(settings), user_id: userId, updated_at: new Date().toISOString() };
   const { data, error } = await supabase.from('user_settings').upsert(payload, { onConflict: 'user_id' }).select().single();
-  if (error) throw error;
+  if (error) {
+    console.error('saveSettings failed:', {
+      message: error?.message,
+      details: error?.details,
+      hint: error?.hint,
+      code: error?.code
+    });
+    throw error;
+  }
   return data;
 };
 
