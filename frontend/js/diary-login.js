@@ -158,6 +158,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       const email = document.getElementById('reg-email').value;
       const password = document.getElementById('reg-password').value;
       const pin = document.getElementById('reg-pin').value;
+      const confirmPass = document.getElementById('reg-password-confirm').value;
+      const confirmPin = document.getElementById('reg-pin-confirm').value;
+      if (password !== confirmPass) throw new Error('Passwords do not match');
+      if (pin !== confirmPin) throw new Error('PINs do not match');
+
 
       if (password.length < 6) throw new Error('Password must be at least 6 characters.');
       if (pin.length < 4 || pin.length > 6) throw new Error('PIN must be 4 to 6 digits.');
