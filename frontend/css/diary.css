@@ -1,0 +1,480 @@
+/* Diary specific styles - Premium Private Notebook feel */
+
+.diary-container {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Dashboard Home Card */
+.diary-dashboard-card {
+  background: var(--t-panel);
+  border: var(--t-border);
+  border-radius: var(--t-radius);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  position: relative;
+  overflow: hidden;
+}
+.diary-dashboard-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 4px; height: 100%;
+  background: var(--t-primary);
+  border-radius: 4px 0 0 4px;
+}
+.diary-stat-row {
+  display: flex;
+  gap: 16px;
+  margin-top: 8px;
+}
+.diary-stat {
+  display: flex;
+  flex-direction: column;
+}
+.diary-stat span {
+  font-size: 12px;
+  color: var(--t-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.diary-stat strong {
+  font-size: 18px;
+  color: var(--t-text);
+}
+
+/* Diary Grid Layout */
+.diary-layout {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 24px;
+  align-items: start;
+}
+@media (max-width: 900px) {
+  .diary-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Left Panel */
+.diary-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+.diary-panel {
+  background: var(--t-panel);
+  border: var(--t-border);
+  border-radius: var(--t-radius);
+  padding: 20px;
+}
+.diary-search-input {
+  width: 100%;
+  padding: 12px 16px;
+  border-radius: var(--t-radius);
+  border: 1px solid var(--t-border);
+  background: var(--t-bg);
+  color: var(--t-text);
+  font-family: inherit;
+  margin-bottom: 16px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.diary-search-input:focus {
+  border-color: var(--t-primary);
+}
+
+/* Calendar */
+.diary-calendar {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  text-align: center;
+  margin-top: 16px;
+}
+.calendar-day-header {
+  font-size: 11px;
+  color: var(--t-muted);
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+.calendar-day {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  border-radius: 50%;
+  cursor: pointer;
+  color: var(--t-text);
+  position: relative;
+}
+.calendar-day:hover {
+  background: var(--t-bg);
+}
+.calendar-day.has-entry::after {
+  content: '';
+  position: absolute;
+  bottom: 2px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--t-primary);
+}
+.calendar-day.active {
+  background: var(--t-primary);
+  color: white;
+}
+
+/* Editor Area */
+.diary-editor-panel {
+  background: var(--t-panel);
+  border: var(--t-border);
+  border-radius: var(--t-radius);
+  padding: 32px;
+  min-height: 600px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.02);
+}
+.editor-topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  border-bottom: 1px solid var(--t-border);
+  padding-bottom: 16px;
+}
+.editor-meta {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+.editor-date {
+  font-size: 14px;
+  color: var(--t-muted);
+  font-weight: 500;
+}
+.save-status {
+  font-size: 12px;
+  color: var(--t-muted);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.save-status.saving::before {
+  content: '';
+  display: inline-block;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: #ff9500;
+  animation: pulse 1s infinite;
+}
+.save-status.saved::before {
+  content: '';
+  display: inline-block;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: #34c759;
+}
+@keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
+
+.editor-actions {
+  display: flex;
+  gap: 8px;
+}
+.icon-btn-diary {
+  background: transparent;
+  border: none;
+  color: var(--t-muted);
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 6px;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.icon-btn-diary:hover {
+  background: var(--t-bg);
+  color: var(--t-text);
+}
+.icon-btn-diary.active-star {
+  color: #ffcc00;
+}
+
+/* Rich Text Toolbar */
+.editor-toolbar {
+  display: flex;
+  gap: 4px;
+  padding: 8px;
+  background: var(--t-bg);
+  border-radius: 8px;
+  margin-bottom: 16px;
+  border: 1px solid var(--t-border);
+  flex-wrap: wrap;
+}
+.toolbar-btn {
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--t-text);
+}
+.toolbar-btn:hover {
+  background: var(--t-panel);
+}
+
+/* Title & Content */
+.diary-title-input {
+  font-size: 32px;
+  font-weight: 700;
+  border: none;
+  background: transparent;
+  color: var(--t-text);
+  width: 100%;
+  outline: none;
+  font-family: 'Space Grotesk', sans-serif;
+  margin-bottom: 16px;
+}
+.diary-title-input::placeholder {
+  color: var(--t-muted);
+  opacity: 0.5;
+}
+
+.diary-rich-content {
+  flex-grow: 1;
+  outline: none;
+  font-size: 16px;
+  line-height: 1.8;
+  color: var(--t-text);
+  padding: 8px 0;
+  min-height: 200px;
+}
+.diary-rich-content[placeholder]:empty:before {
+  content: attr(placeholder);
+  color: var(--t-muted);
+  opacity: 0.5;
+  pointer-events: none;
+}
+.diary-rich-content h1, .diary-rich-content h2, .diary-rich-content h3 {
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
+}
+.diary-rich-content p {
+  margin-bottom: 1em;
+}
+.diary-rich-content ul, .diary-rich-content ol {
+  margin-left: 20px;
+  margin-bottom: 1em;
+}
+.diary-rich-content blockquote {
+  border-left: 3px solid var(--t-primary);
+  margin: 1em 0;
+  padding-left: 16px;
+  color: var(--t-muted);
+  font-style: italic;
+}
+
+/* Mood & Tags */
+.mood-selector {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+.mood-btn {
+  background: var(--t-bg);
+  border: 1px solid var(--t-border);
+  padding: 6px 12px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--t-text);
+  transition: all 0.2s;
+}
+.mood-btn:hover {
+  background: var(--t-panel);
+  border-color: var(--t-primary);
+}
+.mood-btn.selected {
+  background: var(--t-primary);
+  color: white;
+  border-color: var(--t-primary);
+}
+
+.tags-input-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 8px 12px;
+  background: var(--t-bg);
+  border-radius: 8px;
+  border: 1px solid var(--t-border);
+  margin-top: auto;
+}
+.tag-chip {
+  background: var(--t-panel);
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.tag-chip span {
+  cursor: pointer;
+  opacity: 0.5;
+}
+.tag-chip span:hover {
+  opacity: 1;
+  color: red;
+}
+.tags-input-container input {
+  border: none;
+  background: transparent;
+  outline: none;
+  color: var(--t-text);
+  font-size: 14px;
+  flex-grow: 1;
+  min-width: 120px;
+}
+
+/* Recent Entries List */
+.recent-entries {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.entry-card {
+  padding: 16px;
+  border-radius: var(--t-radius);
+  background: var(--t-bg);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.entry-card:hover {
+  border-color: var(--t-primary);
+  transform: translateY(-2px);
+}
+.entry-card.active {
+  border-color: var(--t-primary);
+  background: var(--t-panel);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+.entry-card h4 {
+  margin: 0 0 4px 0;
+  font-size: 15px;
+  color: var(--t-text);
+}
+.entry-card p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--t-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.entry-card .entry-meta {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 8px;
+  font-size: 11px;
+  color: var(--t-muted);
+}
+
+/* Lock Screen */
+.diary-lock-overlay {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(var(--t-bg-rgb, 255,255,255), 0.95);
+  backdrop-filter: blur(10px);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--t-radius);
+}
+.diary-lock-overlay.hidden {
+  display: none;
+}
+.lock-icon {
+  font-size: 48px;
+  margin-bottom: 24px;
+  animation: float 3s ease-in-out infinite;
+}
+@keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-10px); } 100% { transform: translateY(0px); } }
+
+.pin-input-group {
+  display: flex;
+  gap: 12px;
+  margin: 24px 0;
+}
+.pin-digit {
+  width: 48px; height: 56px;
+  font-size: 24px;
+  text-align: center;
+  border-radius: 8px;
+  border: 1px solid var(--t-border);
+  background: var(--t-panel);
+  color: var(--t-text);
+  outline: none;
+}
+.pin-digit:focus {
+  border-color: var(--t-primary);
+}
+
+/* AI Assistant Panel */
+.ai-diary-panel {
+  margin-top: 16px;
+  background: linear-gradient(145deg, rgba(var(--t-primary-rgb, 0,122,255), 0.05), transparent);
+  border: 1px solid var(--t-primary);
+  border-radius: var(--t-radius);
+  padding: 16px;
+  display: none; /* hidden by default */
+}
+.ai-diary-panel.visible {
+  display: block;
+  animation: fadeIn 0.3s ease;
+}
+.ai-diary-chips {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+.ai-chip {
+  background: var(--t-panel);
+  border: 1px solid var(--t-border);
+  padding: 6px 12px;
+  border-radius: 16px;
+  font-size: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.ai-chip:hover {
+  border-color: var(--t-primary);
+  color: var(--t-primary);
+}
+.ai-result {
+  margin-top: 16px;
+  padding: 12px;
+  background: var(--t-bg);
+  border-radius: 8px;
+  font-size: 14px;
+  line-height: 1.6;
+}

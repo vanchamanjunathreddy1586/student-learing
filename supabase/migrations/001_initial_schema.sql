@@ -4,6 +4,19 @@ create table if not exists public.profiles (id uuid primary key references auth.
 create or replace function public.handle_new_user() returns trigger language plpgsql security definer set search_path = public as $$ begin insert into public.profiles (id, display_name) values (new.id, coalesce(new.raw_user_meta_data ->> 'display_name', '')); return new; end; $$;
 drop trigger if exists on_auth_user_created on auth.users;
 create trigger on_auth_user_created after insert on auth.users for each row execute procedure public.handle_new_user();
+
+create table if not exists public.student_profiles (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null unique references auth.users(id) on delete cascade,
+  full_name text not null default '',
+  email text not null,
+  year text,
+  college text,
+  profile_completed boolean not null default false,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
 create table if not exists public.subjects (id uuid primary key default gen_random_uuid(), user_id uuid not null references auth.users(id) on delete cascade, name text not null, color text not null default '#f47e6d', created_at timestamptz not null default now());
 create table if not exists public.topics (id uuid primary key default gen_random_uuid(), subject_id uuid not null references public.subjects(id) on delete cascade, name text not null, mastery numeric not null default 0 check (mastery between 0 and 100), created_at timestamptz not null default now());
 create table if not exists public.study_progress (id uuid primary key default gen_random_uuid(), user_id uuid not null references auth.users(id) on delete cascade, topic_id uuid references public.topics(id) on delete set null, minutes integer not null default 0 check (minutes >= 0), mastery numeric not null default 0, studied_on date not null default current_date, created_at timestamptz not null default now());
@@ -14,8 +27,9 @@ create table if not exists public.ai_usage (id uuid primary key default gen_rand
 create index if not exists study_progress_user_date_idx on public.study_progress(user_id, studied_on desc);
 create index if not exists ai_usage_user_date_idx on public.ai_usage(user_id, created_at desc);
 
-alter table public.profiles enable row level security; alter table public.subjects enable row level security; alter table public.study_progress enable row level security; alter table public.ai_conversations enable row level security; alter table public.ai_messages enable row level security; alter table public.ai_memory enable row level security; alter table public.ai_usage enable row level security;
+alter table public.profiles enable row level security; alter table public.student_profiles enable row level security; alter table public.subjects enable row level security; alter table public.study_progress enable row level security; alter table public.ai_conversations enable row level security; alter table public.ai_messages enable row level security; alter table public.ai_memory enable row level security; alter table public.ai_usage enable row level security;
 create policy "own profile" on public.profiles for all using (auth.uid() = id) with check (auth.uid() = id);
+create policy "own student profile" on public.student_profiles for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
 create policy "own subjects" on public.subjects for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
 create policy "own progress" on public.study_progress for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
 create policy "own conversations" on public.ai_conversations for all using (auth.uid() = user_id) with check (auth.uid() = user_id);

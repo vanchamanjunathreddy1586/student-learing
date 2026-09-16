@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="brutal">
+<head>
+    
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
+  <title>Owner Portal | Smart Learning</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/auth.css">
+  <link rel="stylesheet" href="/css/dashboard.css">
+    <link rel="stylesheet" href="/css/themes.css">
+  <style>
+    .admin-container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+    .data-table { width: 100%; border-collapse: collapse; margin-top: 1rem; background: rgba(255, 255, 255, 0.03); border-radius: 12px; overflow-x: auto; display: block; white-space: nowrap; }
+    .data-table th, .data-table td { padding: 1rem; text-align: left; border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
+    @media (min-width: 768px) { .data-table { display: table; white-space: normal; } }
+    .data-table th { background: rgba(255, 255, 255, 0.05); color: #00f0ff; font-weight: 500; }
+    .form-group { margin-bottom: 1rem; }
+    .form-group label { display: block; margin-bottom: 0.5rem; color: rgba(255, 255, 255, 0.8); }
+    .form-group input { width: 100%; padding: 0.75rem; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; color: white; }
+    .btn-action { background: rgba(255, 255, 255, 0.1); border: none; color: white; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; transition: all 0.2s; }
+    .btn-action:hover { background: rgba(255, 255, 255, 0.2); }
+    .btn-danger { background: rgba(255, 51, 102, 0.2); color: #ff3366; }
+    .btn-danger:hover { background: rgba(255, 51, 102, 0.4); }
+    .add-form { background: rgba(255, 255, 255, 0.02); padding: 1.5rem; border-radius: 12px; margin-bottom: 2rem; border: 1px solid rgba(255, 255, 255, 0.05); }
+  </style>
+</head>
+<body>
+  <div class="glass-background">
+    <div class="blur-circle circle-1"></div>
+    <div class="blur-circle circle-2"></div>
+  </div>
+  <div class="admin-container">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+      <h1><span class="gradient-text">Owner</span> Portal</h1>
+      <div style="display: flex; gap: 1rem;">
+        <a href="/admin.html" class="auth-button" style="text-decoration: none; display: flex; align-items: center; padding: 0.5rem 1.5rem; width: auto; margin: 0; font-size: 0.9rem;">Manage Students & Attendance ➔</a>
+        <button id="logout-btn" class="btn-action">Log Out</button>
+      </div>
+    </div>
+
+    <div class="add-form">
+      <h3>Create New Admin Account</h3>
+      <form id="add-admin-form" style="display: flex; gap: 1rem; align-items: flex-end; flex-wrap: wrap;">
+        <div class="form-group" style="flex: 1; min-width: 200px; margin-bottom: 0;">
+          <label>Full Name</label>
+          <input type="text" id="admin-name" required placeholder="John Doe">
+        </div>
+        <div class="form-group" style="flex: 1; min-width: 200px; margin-bottom: 0;">
+          <label>Email Address</label>
+          <input type="email" id="admin-email" required placeholder="admin@example.com">
+        </div>
+        <div class="form-group" style="flex: 1; min-width: 200px; margin-bottom: 0;">
+          <label>Secure Password</label>
+          <input type="text" id="admin-password" required placeholder="SuperSecret123!">
+        </div>
+        <div class="form-group" style="flex: 1; min-width: 150px; margin-bottom: 0;">
+          <label>Role</label>
+          <select id="admin-role" required>
+            <option value="admin">Administrator</option>
+            <option value="lecturer">Lecturer</option>
+          </select>
+        </div>
+        <button type="submit" class="auth-button" style="width: auto; margin-top: 0;">Create Staff</button>
+      </form>
+      <div id="admin-message" style="margin-top: 1rem; color: #00ff88; font-weight: 500;"></div>
+    </div>
+
+    <h2>Administrators</h2>
+    <table class="data-table" id="admins-table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Role</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+  <script type="module" src="js/owner.js"></script>
+</body>
+</html>

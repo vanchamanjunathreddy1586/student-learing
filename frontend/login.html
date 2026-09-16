@@ -1,1 +1,287 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Log in | Smart Learning</title><link rel="stylesheet" href="/css/page.css"></head><body><main class="page"><nav class="page-nav"><a class="page-brand" href="/">smart <span>learning</span></a><a href="/register.html">Create account</a></nav><section class="panel"><p class="eyebrow">WELCOME BACK</p><h1>Return to your learning path.</h1><p>Supabase Auth keeps your classroom, progress, and AI memory private.</p><form id="login-form"><p><label>Email<br><input id="email" required type="email"></label></p><p><label>Password<br><input id="password" required type="password"></label></p><p id="form-error" role="alert"></p><button class="action" type="submit">Log in</button></form></section></main><script type="module">import { signIn } from '/js/auth.js'; document.querySelector('#login-form').addEventListener('submit', async (event) => { event.preventDefault(); const error = document.querySelector('#form-error'); error.textContent = ''; try { const { error: authError } = await signIn(document.querySelector('#email').value, document.querySelector('#password').value); if (authError) throw authError; window.location.assign('/dashboard.html'); } catch (authError) { error.textContent = authError.message; } });</script></body></html>
+<!doctype html>
+<html lang="en" data-theme="premium">
+<head>
+    
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Student Learning authentication portal">
+  <title>Student Learning | Authentication</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/auth.css">
+</head>
+<body class="auth-page">
+  <div id="global-loading" class="global-loading" aria-live="polite">Checking your learning session...</div>
+
+  <div class="auth-scene" aria-hidden="true">
+    <div class="scene-glow scene-glow-a"></div>
+    <div class="scene-glow scene-glow-b"></div>
+    <div class="scene-orb orb-1"></div>
+    <div class="scene-orb orb-2"></div>
+    <div class="scene-orb orb-3"></div>
+    
+    
+    
+    
+    
+    
+    
+  </div>
+
+  <main class="auth-shell">
+    <section class="auth-card" id="auth-card" aria-live="polite">
+      <div class="card-glow"></div>
+
+      <header class="brand-block" aria-label="Student Learning branding">
+        <div class="brand-mark">SL</div>
+        <div>
+          <div class="brand-name">Student Learning</div>
+          <p class="brand-tagline">Learn • Practice • Grow</p>
+        </div>
+      </header>
+
+      <div id="status-banner" class="status-banner" role="status" hidden></div>
+
+      <section class="auth-panel" data-panel="login">
+        <div class="panel-heading">
+          <h1>Welcome Back</h1>
+          <p>Sign in to continue your learning journey.</p>
+        </div>
+
+        <div class="role-toggle-container">
+          <button type="button" class="role-btn active" data-role-select="student">Student</button>
+          <button type="button" class="role-btn" data-role-select="faculty">Faculty / Admin</button>
+        </div>
+
+        <form id="login-form" novalidate>
+          <div class="field-group">
+            <label for="login-email">Email</label>
+            <div class="input-wrap">
+              <span class="input-icon" aria-hidden="true">✉</span>
+              <input id="login-email" name="email" type="email" autocomplete="email" aria-describedby="login-email-error" required>
+            </div>
+            <p class="field-error" id="login-email-error" aria-live="polite"></p>
+          </div>
+
+          <div class="field-group">
+            <label for="login-password">Password</label>
+            <div class="input-wrap password-wrap">
+              <span class="input-icon" aria-hidden="true">🔒</span>
+              <input id="login-password" name="password" type="password" autocomplete="current-password" aria-describedby="login-password-error" required>
+              <button type="button" class="text-button password-toggle" data-password-toggle="login-password" aria-label="Show password">👁️</button>
+            </div>
+            <p class="field-error" id="login-password-error" aria-live="polite"></p>
+          </div>
+
+          <div class="utility-row">
+            <label class="remember-me">
+              <input type="checkbox" name="remember-me">
+              <span>Remember Me</span>
+            </label>
+            <button type="button" class="text-button" data-auth-link="forgot">Forgot Password?</button>
+          </div>
+
+          <button id="login-button" class="primary-button" type="submit">Login</button>
+
+          <div class="auth-divider"><span>OR</span></div>
+
+          <button id="google-login-button" class="secondary-button" type="button">
+            <span class="google-mark" aria-hidden="true">G</span>
+            Continue with Google
+          </button>
+
+          <p class="bottom-copy">
+            Don't have an account?
+            <a href="#" class="text-button inline-link" data-auth-link="register">Create Account</a>
+          </p>
+        </form>
+      </section>
+
+      <section class="auth-panel" data-panel="register" hidden aria-hidden="true">
+        <div class="panel-heading">
+          <p class="eyebrow">START LEARNING</p>
+          <h1>Create Your Account</h1>
+          <p>Start your learning journey today.</p>
+        </div>
+
+        <form id="register-form" novalidate>
+          <div class="field-group">
+            <label for="register-name">Full Name</label>
+            <div class="input-wrap">
+              <span class="input-icon" aria-hidden="true">👤</span>
+              <input id="register-name" name="fullName" type="text" autocomplete="name" aria-describedby="register-name-error">
+            </div>
+            <p class="field-error" id="register-name-error" aria-live="polite"></p>
+          </div>
+
+          <div class="field-group">
+            <label for="register-email">Email</label>
+            <div class="input-wrap">
+              <span class="input-icon" aria-hidden="true">✉</span>
+              <input id="register-email" name="email" type="email" autocomplete="email" aria-describedby="register-email-error">
+            </div>
+            <p class="field-error" id="register-email-error" aria-live="polite"></p>
+          </div>
+
+          <div class="field-group">
+            <label for="register-password">Password</label>
+            <div class="input-wrap password-wrap">
+              <span class="input-icon" aria-hidden="true">🔒</span>
+              <input id="register-password" name="password" type="password" autocomplete="new-password" aria-describedby="register-password-error">
+              <button type="button" class="text-button password-toggle" data-password-toggle="register-password" aria-label="Show password">👁️</button>
+            </div>
+            <p class="field-error" id="register-password-error" aria-live="polite"></p>
+            <div class="strength-meter" aria-live="polite">
+              <div class="strength-head">
+                <span>Password strength</span>
+                <span id="password-strength">Weak</span>
+              </div>
+              <div class="meter-track"><span id="password-meter" data-level="weak"></span></div>
+              <p id="password-requirements">Use 8+ characters and a mix of letters, numbers, and symbols.</p>
+            </div>
+          </div>
+
+          <div class="field-group">
+            <label for="register-confirm-password">Confirm Password</label>
+            <div class="input-wrap password-wrap">
+              <span class="input-icon" aria-hidden="true">🔒</span>
+              <input id="register-confirm-password" name="confirmPassword" type="password" autocomplete="new-password" aria-describedby="register-confirm-password-error">
+              <button type="button" class="text-button password-toggle" data-password-toggle="register-confirm-password" aria-label="Show password">👁️</button>
+            </div>
+            <p class="field-error" id="register-confirm-password-error" aria-live="polite"></p>
+          </div>
+
+          <label class="terms-row">
+            <input id="register-terms" type="checkbox" name="termsAccepted">
+            <span>I agree to the Terms &amp; Conditions and Privacy Policy</span>
+          </label>
+          <p class="field-error" id="register-terms-error" aria-live="polite"></p>
+
+          <button id="register-button" class="primary-button" type="submit">Create Account</button>
+
+          <div class="auth-divider"><span>OR</span></div>
+
+          <button id="register-google-button" class="secondary-button" type="button">
+            <span class="google-mark" aria-hidden="true">G</span>
+            Continue with Google
+          </button>
+
+          <p class="bottom-copy">
+            Already have an account?
+            <a href="#" class="text-button inline-link" data-auth-link="login">Login</a>
+          </p>
+        </form>
+      </section>
+
+      <section class="auth-panel" data-panel="forgot" hidden aria-hidden="true">
+        <div class="panel-heading">
+          <p class="eyebrow">SECURE ACCESS</p>
+          <h1>Reset Your Password</h1>
+          <p>Enter your email and we'll send you a secure one-time code.</p>
+        </div>
+
+        <form id="forgot-form" novalidate>
+          <div class="field-group">
+            <label for="forgot-email">Email</label>
+            <div class="input-wrap">
+              <span class="input-icon" aria-hidden="true">✉</span>
+              <input id="forgot-email" name="email" type="email" autocomplete="email" aria-describedby="forgot-email-error" required>
+            </div>
+            <p class="field-error" id="forgot-email-error" aria-live="polite"></p>
+          </div>
+
+          <button id="forgot-button" class="primary-button" type="submit">Send OTP</button>
+
+          <a href="#" class="text-button back-button" data-auth-link="login">Back to Login</a>
+        </form>
+      </section>
+
+      <section class="auth-panel" data-panel="reset" hidden aria-hidden="true">
+        <div class="panel-heading">
+          <p class="eyebrow">SECURE ACCESS</p>
+          <h1>Choose a New Password</h1>
+          <p>Enter the code from your email, then choose a new password.</p>
+        </div>
+
+        <form id="reset-form" novalidate>
+          <div class="field-group">
+            <label for="reset-otp">Verification Code</label>
+            <div class="input-wrap">
+              <span class="input-icon" aria-hidden="true">✦</span>
+              <input id="reset-otp" inputmode="numeric" autocomplete="one-time-code" maxlength="6" aria-describedby="reset-otp-error" required>
+            </div>
+            <p class="field-error" id="reset-otp-error" aria-live="polite"></p>
+          </div>
+
+          <div class="field-group">
+            <label for="reset-password">New Password</label>
+            <div class="input-wrap password-wrap">
+              <span class="input-icon" aria-hidden="true">🔒</span>
+              <input id="reset-password" type="password" autocomplete="new-password" aria-describedby="reset-password-error" required>
+              <button type="button" class="text-button password-toggle" data-password-toggle="reset-password" aria-label="Show password">👁️</button>
+            </div>
+            <p class="field-error" id="reset-password-error" aria-live="polite"></p>
+          </div>
+
+          <div class="field-group">
+            <label for="reset-confirm-password">Confirm Password</label>
+            <div class="input-wrap password-wrap">
+              <span class="input-icon" aria-hidden="true">🔒</span>
+              <input id="reset-confirm-password" type="password" autocomplete="new-password" aria-describedby="reset-confirm-password-error" required>
+              <button type="button" class="text-button password-toggle" data-password-toggle="reset-confirm-password" aria-label="Show password">👁️</button>
+            </div>
+            <p class="field-error" id="reset-confirm-password-error" aria-live="polite"></p>
+          </div>
+
+          <button id="reset-button" class="primary-button" type="submit">Update Password</button>
+          <a href="#" class="text-button back-button" data-auth-link="login">Back to Login</a>
+        </form>
+      </section>
+
+      <section class="auth-panel" data-panel="profile" hidden aria-hidden="true">
+        <div class="panel-heading compact-heading">
+          <p class="eyebrow">PROFILE SETUP</p>
+          <h1>Complete Your Student Profile 🎓</h1>
+          <p>Just two details and you're ready to learn.</p>
+        </div>
+
+        <div class="profile-progress" aria-live="polite">Profile Setup • 1 of 1</div>
+
+        <form id="profile-form" novalidate>
+          <div class="selection-block">
+            <div class="selection-head">
+              <label>Your year</label>
+              <span id="profile-year-error" class="field-error" aria-live="polite"></span>
+            </div>
+            <div class="year-grid" role="radiogroup" aria-label="Student year selection">
+              <button type="button" class="year-card" data-year="1st Year" aria-pressed="false">1st Year</button>
+              <button type="button" class="year-card" data-year="2nd Year" aria-pressed="false">2nd Year</button>
+              <button type="button" class="year-card" data-year="3rd Year" aria-pressed="false">3rd Year</button>
+              <button type="button" class="year-card" data-year="4th Year" aria-pressed="false">4th Year</button>
+            </div>
+          </div>
+
+          <div class="selection-block">
+            <div class="selection-head college-head">
+              <label for="college-input">College</label>
+              <span id="profile-college-error" class="field-error" aria-live="polite"></span>
+            </div>
+            <div class="input-wrap search-wrap">
+              <span class="input-icon" aria-hidden="true">🏫</span>
+              <input id="college-input" name="college" type="text" placeholder="Search or enter your college" autocomplete="organization" aria-label="Search or enter your college" list="college-options">
+            </div>
+            <div class="selected-college" id="selected-college-value">No college selected</div>
+            <ul id="college-suggestions" class="college-suggestions" aria-live="polite"></ul>
+          </div>
+
+          <button id="profile-submit" class="primary-button" type="submit">Continue →</button>
+        </form>
+      </section>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/three@0.160.1/build/three.min.js"></script>
+  <script type="module" src="/js/auth-advanced.js"></script>
+</body>
+</html>

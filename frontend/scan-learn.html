@@ -1,1 +1,123 @@
-<!doctype html><html><head><meta charset="utf-8"><title>Scan & Learn</title><link rel="stylesheet" href="/css/page.css"></head><body><main class="page"><nav class="page-nav"><a class="page-brand" href="/">smart <span>learning</span></a><a href="/">Overview</a></nav><section class="panel"><p class="eyebrow">DOCUMENT INTELLIGENCE</p><h1>Turn reading into momentum.</h1><p>Upload processing is secured by Supabase Storage and progresses from extraction to quiz generation.</p><input type="file" accept=".pdf,.docx,.pptx,.txt,.png,.jpg,.jpeg"><button class="action" data-action>Start processing</button></section></main><script src="/js/page.js"></script></body></html>
+<!doctype html>
+<html lang="en" data-theme="futuristic">
+<head>
+    
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
+  <title>Student Learning | Scan & Learn</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/app.css">
+  <link rel="stylesheet" href="/css/dashboard.css">
+    <link rel="stylesheet" href="/css/themes.css">
+  <link rel="stylesheet" href="/css/toast.css">
+  <style>
+    .upload-area { border: 2px dashed var(--dash-line); border-radius: 16px; padding: 60px 20px; text-align: center; background: rgba(255,255,255,0.02); transition: all 0.3s; cursor: pointer; }
+    .upload-area:hover, .upload-area.dragover { border-color: var(--dash-cyan); background: rgba(98, 230, 226, 0.05); }
+    .upload-icon { font-size: 48px; color: var(--dash-cyan); margin-bottom: 20px; }
+    
+    .result-container { display: flex; gap: 30px; margin-top: 30px; align-items: flex-start; }
+    .preview-panel { flex: 1; background: var(--dash-panel); border: 1px solid var(--dash-line); border-radius: 12px; padding: 20px; box-shadow: 0 12px 30px rgba(0,0,0,0.3); }
+    .ai-panel { flex: 1.5; background: var(--dash-panel); border: 1px solid var(--dash-line); border-radius: 12px; padding: 20px; box-shadow: 0 12px 30px rgba(0,0,0,0.3); }
+    
+    .extracted-text { background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px; font-size: 13px; line-height: 1.6; max-height: 200px; overflow-y: auto; color: var(--dash-muted); font-family: monospace; }
+    .ai-summary { font-size: 14px; line-height: 1.6; color: var(--dash-text); margin-top: 15px; }
+    
+    .action-row { display: flex; gap: 10px; margin-top: 20px; }
+    
+    #loading-state { text-align: center; padding: 40px; display: none; }
+    .spinner { border: 4px solid rgba(255,255,255,0.1); width: 40px; height: 40px; border-radius: 50%; border-left-color: var(--dash-cyan); animation: spin 1s linear infinite; margin: 0 auto 20px; }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    
+    @media(max-width: 900px) {
+      .result-container { flex-direction: column; }
+    }
+  </style>
+</head>
+<body class="dashboard-page">
+  <div class="app-shell" id="dashboard-shell">
+    <div class="sidebar-overlay"></div>
+      <aside class="sidebar">
+      <div class="brand"><span class="brand-mark">✦</span><span>smart<br><b>learning</b></span></div>
+      <a class="profile-mini profile-link" href="/settings.html#account" aria-label="Open profile and settings"><div class="avatar" data-profile-initials>SL</div><div><strong data-profile-name>Student</strong><small>Profile &amp; settings</small></div><span class="status-dot"></span></a>
+      <nav aria-label="Main navigation">
+          <p class="nav-label">Workspace</p>
+          <a class="nav-item " href="/"><span>🏠</span> Overview</a>
+          <a class="nav-item " href="/ai-teacher.html"><span>🤖</span> AI Teacher</a>
+          <a class="nav-item active" href="/scan-learn.html"><span>📷</span> Scan & Learn</a>
+          <a class="nav-item " href="/study-planner.html"><span>📅</span> Study planner</a>
+          
+          <p class="nav-label">Learn</p>
+          <a class="nav-item " href="/classroom.html"><span>📚</span> Subjects</a>
+          <a class="nav-item " href="/quiz.html"><span>📝</span> Quizzes</a>
+          <a class="nav-item " href="/groups.html"><span>👥</span> Study Groups</a>
+          <a class="nav-item " href="/analytics.html"><span>📊</span> Analytics & Gamification</a>
+          
+          <p class="nav-label">Personal</p>
+          <a class="nav-item " href="/diary.html"><span>📔</span> Student Diary</a>
+        </nav>
+    </aside>
+    <main class="main-content">
+      <header class="topbar">
+        <button class="mobile-menu" aria-label="Open menu">☰</button>
+        <div class="breadcrumbs">Workspace <span>/</span> Scan & Learn</div>
+        <div class="top-actions">
+        <a class="avatar small profile-avatar-link" href="/settings.html#account" data-profile-initials>SL</a></div>
+      </header>
+
+      <section class="welcome reveal">
+        <div>
+          <p class="eyebrow">DOCUMENT INTELLIGENCE</p>
+          <h1>Scan & Learn</h1>
+          <p class="muted">Upload notes, syllabus, or screenshots. AI will extract and summarize it.</p>
+        </div>
+      </section>
+
+      <div id="upload-view">
+        <div class="upload-area" id="drop-zone">
+          <div class="upload-icon">📄</div>
+          <h3 style="font-family:'Space Grotesk'; margin:0 0 10px;">Drag & Drop your file</h3>
+          <p class="muted" style="margin-bottom:20px;">Supports Images, PDFs, and Text files</p>
+          <input type="file" id="file-input" style="display:none;" accept=".txt,.png,.jpg,.jpeg">
+          <button class="primary-btn" onclick="document.getElementById('file-input').click()">Browse Files</button>
+        </div>
+      </div>
+
+      <div id="loading-state">
+        <div class="spinner"></div>
+        <h3 id="loading-text">Analyzing document...</h3>
+      </div>
+
+      <div id="result-view" style="display: none;">
+        <button class="btn-secondary" style="margin-bottom:20px; border:1px solid var(--dash-line); background:transparent; color:white; padding:10px; border-radius:8px; cursor:pointer;" onclick="location.reload()">← Upload Another</button>
+        <div class="result-container">
+          <div class="preview-panel">
+            <h3 style="font-family:'Space Grotesk'; margin:0 0 15px; border-bottom:1px solid var(--dash-line); padding-bottom:10px;">Document Content</h3>
+            <div class="extracted-text" id="extracted-text"></div>
+          </div>
+          
+          <div class="ai-panel">
+            <div style="display:flex; justify-content:space-between; border-bottom:1px solid var(--dash-line); padding-bottom:10px; margin-bottom:15px;">
+              <h3 style="font-family:'Space Grotesk'; margin:0;"><span style="color:var(--dash-cyan);">✦</span> AI Insights</h3>
+              <span style="font-size:11px; color:var(--dash-muted);" id="ai-provider">Generated by AI</span>
+            </div>
+            
+            <div class="ai-summary" id="ai-summary"></div>
+            
+            <div class="action-row">
+              <button class="primary-btn" style="flex:1;" id="btn-quiz">Take a Quiz on this</button>
+              <button class="btn-secondary" style="flex:1; border:1px solid var(--dash-line); background:transparent; color:white; border-radius:8px;" id="btn-flashcards">Make Flashcards</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+  <div class="toast" id="toast" role="status"></div>
+  <script type="module" src="/js/supabase.js"></script>
+  <script type="module" src="/js/scan-learn.js"></script>
+<script type="module" src="/js/app.js"></script>
+</body>
+</html>

@@ -1,1 +1,228 @@
-<!doctype html><html><head><meta charset="utf-8"><title>Admin dashboard</title><link rel="stylesheet" href="/css/page.css"></head><body><main class="page"><nav class="page-nav"><a class="page-brand" href="/">smart <span>learning</span></a><a href="/">Overview</a></nav><section class="panel"><p class="eyebrow">ADMIN CONTROL ROOM</p><h1>AI health at a glance.</h1><p>Provider availability, usage, cost, error rate, and fallback telemetry belong here behind an admin role policy.</p><div class="grid"><div class="metric"><small>Providers</small><strong id="providers">--</strong></div><div class="metric"><small>Mode</small><strong id="mode">--</strong></div><div class="metric"><small>Secrets</small><strong>Server</strong></div></div></section></main><script>Promise.all([fetch('/api/ai/providers').then(r=>r.json()),fetch('/api/health').then(r=>r.json())]).then(([p,h])=>{providers.textContent=p.providers.length;mode.textContent=h.mode})</script></body></html>
+<!DOCTYPE html>
+<html lang="en" data-theme="premium">
+<head>
+    
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
+  <title>Admin Dashboard | Smart Learning</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/auth.css">
+  <link rel="stylesheet" href="/css/dashboard.css">
+    <link rel="stylesheet" href="/css/themes.css">
+  <style>
+    .admin-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+    .admin-nav {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding-bottom: 1rem;
+    }
+    .admin-tab {
+      background: none;
+      border: none;
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 1.1rem;
+      cursor: pointer;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      transition: all 0.3s;
+    }
+    .admin-tab.active {
+      background: rgba(0, 240, 255, 0.1);
+      color: #00f0ff;
+    }
+    .admin-panel {
+      display: none;
+    }
+    .admin-panel.active {
+      display: block;
+    }
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 12px;
+      overflow-x: auto;
+      display: block;
+      white-space: nowrap;
+    }
+    .data-table th, .data-table td {
+      padding: 1rem;
+      text-align: left;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    @media (min-width: 768px) {
+      .data-table { display: table; white-space: normal; }
+    }
+    .data-table th {
+      background: rgba(255, 255, 255, 0.05);
+      color: #00f0ff;
+      font-weight: 500;
+    }
+    .status-badge {
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+    .status-active { background: rgba(0, 255, 136, 0.2); color: #00ff88; }
+    .status-banned { background: rgba(255, 51, 102, 0.2); color: #ff3366; }
+    .status-admin { background: rgba(162, 0, 255, 0.2); color: #a200ff; }
+    
+    .form-group {
+      margin-bottom: 1rem;
+    }
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      color: rgba(255, 255, 255, 0.8);
+    }
+    .form-group input, .form-group select {
+      width: 100%;
+      padding: 0.75rem;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      color: white;
+    }
+    .btn-action {
+      background: rgba(255, 255, 255, 0.1);
+      border: none;
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-action:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+    .btn-danger {
+      background: rgba(255, 51, 102, 0.2);
+      color: #ff3366;
+    }
+    .btn-danger:hover {
+      background: rgba(255, 51, 102, 0.4);
+    }
+    .add-form {
+      background: rgba(255, 255, 255, 0.02);
+      padding: 1.5rem;
+      border-radius: 12px;
+      margin-bottom: 2rem;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+  </style>
+</head>
+<body>
+  <div class="glass-background">
+    <div class="blur-circle circle-1"></div>
+    <div class="blur-circle circle-2"></div>
+    <div class="blur-circle circle-3"></div>
+  </div>
+
+  <div class="admin-container">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+      <h1><span class="gradient-text">Admin</span> Portal</h1>
+      <button id="logout-btn" class="btn-action">Return to App</button>
+    </div>
+
+    <div class="admin-nav">
+      <button class="admin-tab active" data-target="students-panel">Students</button>
+      <button class="admin-tab" data-target="colleges-panel">Colleges</button>
+      <button class="admin-tab" data-target="subjects-panel">Master Subjects</button>
+    </div>
+
+    <!-- Students Panel -->
+    <div id="students-panel" class="admin-panel active">
+      <h2>Student Management</h2>
+      <p style="color: rgba(255,255,255,0.6); margin-bottom: 1rem;">View attendance (study minutes) and manage account access.</p>
+      <table class="data-table" id="students-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>College</th>
+            <th>Attendance (Mins)</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td colspan="6" style="text-align: center;">Loading students...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Colleges Panel -->
+    <div id="colleges-panel" class="admin-panel">
+      <h2>College Directory</h2>
+      <div class="add-form">
+        <h3>Add New College</h3>
+        <form id="add-college-form" style="display: flex; gap: 1rem; align-items: flex-end;">
+          <div class="form-group" style="flex: 1; margin-bottom: 0;">
+            <label>College Name</label>
+            <input type="text" id="college-name" required placeholder="e.g. Stanford University">
+          </div>
+          <button type="submit" class="auth-button" style="width: auto; margin-top: 0;">Add College</button>
+        </form>
+      </div>
+      <table class="data-table" id="colleges-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Status</th>
+            <th>Added On</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <!-- Subjects Panel -->
+    <div id="subjects-panel" class="admin-panel">
+      <h2>Master Subject Catalog</h2>
+      <div class="add-form">
+        <h3>Add New Subject</h3>
+        <form id="add-subject-form" style="display: flex; gap: 1rem; align-items: flex-end; flex-wrap: wrap;">
+          <div class="form-group" style="flex: 1; min-width: 200px; margin-bottom: 0;">
+            <label>Subject Name</label>
+            <input type="text" id="subject-name" required placeholder="e.g. Data Structures">
+          </div>
+          <div class="form-group" style="flex: 1; min-width: 200px; margin-bottom: 0;">
+            <label>Category</label>
+            <input type="text" id="subject-category" required placeholder="e.g. Computer Science">
+          </div>
+          <div class="form-group" style="flex: 1; min-width: 200px; margin-bottom: 0;">
+            <label>College (Optional)</label>
+            <select id="subject-college">
+              <option value="">Global (All Colleges)</option>
+            </select>
+          </div>
+          <button type="submit" class="auth-button" style="width: auto; margin-top: 0;">Add Subject</button>
+        </form>
+      </div>
+      <table class="data-table" id="subjects-table">
+        <thead>
+          <tr>
+            <th>Subject Name</th>
+            <th>Category</th>
+            <th>College Binding</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+  </div>
+
+  <script type="module" src="js/admin.js"></script>
+</body>
+</html>

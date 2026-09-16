@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en" data-theme="gradient">
+<head>
+    
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
+  <title>Student Learning | Study Groups</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/app.css">
+  <link rel="stylesheet" href="/css/dashboard.css">
+    <link rel="stylesheet" href="/css/themes.css">
+  <link rel="stylesheet" href="/css/toast.css">
+  <style>
+    .split-layout { display: flex; gap: 24px; margin-top: 20px; height: calc(100vh - 200px); }
+    .groups-sidebar { width: 300px; background: var(--dash-panel); border: 1px solid var(--dash-line); border-radius: 16px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 12px 30px rgba(0,0,0,0.3); }
+    .groups-header { padding: 20px; border-bottom: 1px solid var(--dash-line); }
+    .groups-list { flex: 1; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; gap: 8px; }
+    .group-item { padding: 16px; border-radius: 12px; cursor: pointer; transition: background 0.2s; border: 1px solid transparent; }
+    .group-item:hover { background: rgba(255,255,255,0.05); border-color: var(--dash-line); }
+    .group-item.active { background: rgba(98, 230, 226, 0.1); border-color: var(--dash-cyan); }
+    .group-name { font-weight: 600; color: var(--dash-text); display: block; margin-bottom: 4px; }
+    .group-meta { font-size: 11px; color: var(--dash-muted); }
+
+    .feed-area { flex: 1; background: var(--dash-panel); border: 1px solid var(--dash-line); border-radius: 16px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 12px 30px rgba(0,0,0,0.3); }
+    .feed-header { padding: 20px; border-bottom: 1px solid var(--dash-line); display: flex; justify-content: space-between; align-items: center; }
+    .feed-header h2 { font-family: 'Space Grotesk'; font-size: 20px; margin: 0; color: var(--dash-cyan); }
+    
+    .notes-list { flex: 1; overflow-y: auto; padding: 24px; display: flex; flex-direction: column; gap: 20px; }
+    .note-card { background: rgba(255,255,255,0.02); border: 1px solid var(--dash-line); border-radius: 12px; padding: 20px; }
+    .note-header { display: flex; justify-content: space-between; margin-bottom: 15px; }
+    .note-author { display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: bold; }
+    .note-avatar { width: 28px; height: 28px; background: linear-gradient(135deg, var(--dash-pink), var(--dash-violet)); border-radius: 50%; display: grid; place-items: center; font-size: 10px; }
+    .note-date { font-size: 11px; color: var(--dash-muted); }
+    .note-title { font-size: 16px; font-weight: bold; margin: 0 0 10px; color: var(--dash-text); }
+    .note-content { font-size: 14px; line-height: 1.6; color: var(--dash-muted); white-space: pre-wrap; }
+    
+    .post-box { padding: 20px; border-top: 1px solid var(--dash-line); background: rgba(0,0,0,0.2); }
+    .post-input { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--dash-line); border-radius: 8px; padding: 12px; color: white; font-family: inherit; margin-bottom: 10px; }
+    
+    @media (max-width: 900px) {
+      .split-layout { flex-direction: column; height: auto; }
+      .groups-sidebar { width: 100%; height: 250px; }
+      .feed-area { height: 600px; }
+    }
+  </style>
+</head>
+<body class="dashboard-page">
+  <div class="app-shell" id="dashboard-shell">
+    <div class="sidebar-overlay"></div>
+      <aside class="sidebar">
+      <div class="brand"><span class="brand-mark">✦</span><span>smart<br><b>learning</b></span></div>
+      <a class="profile-mini profile-link" href="/settings.html#account"><div class="avatar" data-profile-initials>SL</div><div><strong data-profile-name>Student</strong><small>Profile &amp; settings</small></div></a>
+      <nav aria-label="Main navigation">
+          <p class="nav-label">Workspace</p>
+          <a class="nav-item " href="/"><span>🏠</span> Overview</a>
+          <a class="nav-item " href="/ai-teacher.html"><span>🤖</span> AI Teacher</a>
+          <a class="nav-item " href="/scan-learn.html"><span>📷</span> Scan & Learn</a>
+          <a class="nav-item " href="/study-planner.html"><span>📅</span> Study planner</a>
+          
+          <p class="nav-label">Learn</p>
+          <a class="nav-item " href="/classroom.html"><span>📚</span> Subjects</a>
+          <a class="nav-item " href="/quiz.html"><span>📝</span> Quizzes</a>
+          <a class="nav-item active" href="/groups.html"><span>👥</span> Study Groups</a>
+          <a class="nav-item " href="/analytics.html"><span>📊</span> Analytics & Gamification</a>
+          
+          <p class="nav-label">Personal</p>
+          <a class="nav-item " href="/diary.html"><span>📔</span> Student Diary</a>
+        </nav>
+    </aside>
+    <main class="main-content">
+      <header class="topbar">
+        <button class="mobile-menu">☰</button>
+        <div class="breadcrumbs">Learn <span>/</span> Study Groups</div>
+        <div class="top-actions">
+        <a class="avatar small profile-avatar-link" href="/settings.html#account" data-profile-initials>SL</a></div>
+      </header>
+
+      <section class="welcome reveal">
+        <div>
+          <p class="eyebrow">COLLABORATION</p>
+          <h1>Study Groups & Public Notes</h1>
+          <p class="muted">Share study guides, ask questions, and collaborate with peers.</p>
+        </div>
+      </section>
+
+      <div class="split-layout reveal">
+        <div class="groups-sidebar">
+          <div class="groups-header">
+            <h3 style="margin:0; font-family:'Space Grotesk';">Your Groups</h3>
+          </div>
+          <div class="groups-list" id="groups-list">
+            <p class="muted" style="text-align:center; padding: 20px;">Loading groups...</p>
+          </div>
+        </div>
+        
+        <div class="feed-area">
+          <div class="feed-header">
+            <h2 id="current-group-name">Select a Group</h2>
+            <button class="btn-secondary" id="join-group-btn" style="display:none; padding: 6px 12px; font-size: 12px;">+ Join Group</button>
+          </div>
+          
+          <div class="notes-list" id="notes-list">
+            <div style="text-align: center; color: var(--dash-muted); margin-top: 40px;">
+              Select a group from the sidebar to view public notes and discussions.
+            </div>
+          </div>
+          
+          <div class="post-box" id="post-box" style="display: none;">
+            <input type="text" class="post-input" id="note-title" placeholder="Note Title / Topic" style="font-weight: bold;">
+            <textarea class="post-input" id="note-content" rows="3" placeholder="Paste your study notes, insights, or questions here..." style="resize: none;"></textarea>
+            <div style="text-align: right;">
+              <button class="primary-btn" id="post-note-btn">Post Public Note</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div class="toast" id="toast" role="status"></div>
+  <script type="module" src="/js/supabase.js"></script>
+  <script type="module" src="/js/groups.js"></script>
+<script type="module" src="/js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,317 @@
+/* === Theme System for Smart Learning === */
+:root {
+  /* Common variables we will override */
+  --t-bg: var(--dash-bg);
+  --t-panel: var(--dash-panel);
+  --t-line: var(--dash-line);
+  --t-text: var(--dash-text);
+  --t-muted: var(--dash-muted);
+  --t-primary: var(--dash-cyan);
+  --t-secondary: var(--dash-pink);
+  
+  --t-radius: 16px;
+  --t-shadow: 0 22px 80px #00000026;
+  --t-border: 1px solid var(--t-line);
+  --t-backdrop: blur(22px);
+  --t-font: 'DM Sans', sans-serif;
+  --t-heading: 'Space Grotesk', sans-serif;
+}
+
+/* Base override for dashboard.css to use our theme variables */
+.dashboard-page {
+  background: var(--t-bg) !important;
+  color: var(--t-text) !important;
+  font-family: var(--t-font) !important;
+  transition: background 0.4s ease, color 0.4s ease;
+}
+.dashboard-page h1, .dashboard-page h2, .dashboard-page h3, .dashboard-page strong {
+  font-family: var(--t-heading) !important;
+  color: var(--t-text) !important;
+}
+.dashboard-page .muted { color: var(--t-muted) !important; }
+
+.dashboard-page .sidebar, 
+.dashboard-page .stat-card, 
+.dashboard-page .profile-card, 
+.dashboard-page .continue-card, 
+.dashboard-page .ai-card, 
+.dashboard-page .quick-actions {
+  background: var(--t-panel) !important;
+  border: var(--t-border) !important;
+  box-shadow: var(--t-shadow) !important;
+  backdrop-filter: var(--t-backdrop) !important;
+  border-radius: var(--t-radius) !important;
+  transition: all 0.4s ease;
+}
+
+/* Sidebar needs specific border radius depending on mobile/desktop */
+@media(min-width: 901px) {
+  .dashboard-page .sidebar {
+    border-radius: 0 !important;
+  }
+}
+
+.dashboard-page .topbar {
+  background: var(--t-panel) !important;
+  border-bottom: var(--t-border) !important;
+  backdrop-filter: var(--t-backdrop) !important;
+}
+
+/* Badges / Primary Buttons */
+.dashboard-page .primary-btn {
+  background: var(--t-primary) !important;
+  color: #fff !important; /* Will override per theme if needed */
+  border: var(--t-border) !important;
+  border-radius: calc(var(--t-radius) - 4px) !important;
+}
+.dashboard-page .nav-item.active {
+  color: var(--t-primary) !important;
+  border-left: 3px solid var(--t-primary) !important;
+  background: rgba(150,150,150,0.1) !important;
+}
+
+
+/* ==================================================
+   THEME 1: Minimal Apple-style
+   ================================================== */
+html[data-theme="minimal"] {
+  --t-bg: #f5f5f7;
+  --t-panel: #ffffff;
+  --t-line: #e5e5ea;
+  --t-text: #1d1d1f;
+  --t-muted: #86868b;
+  --t-primary: #0071e3;
+  --t-secondary: #ff3b30;
+  --t-radius: 18px;
+  --t-shadow: 0 4px 24px rgba(0,0,0,0.04);
+  --t-border: 1px solid rgba(0,0,0,0.02);
+  --t-backdrop: none;
+  --t-font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --t-heading: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+html[data-theme="minimal"] .dashboard-page .stat-card.accent { background: #0071e3 !important; color: white !important; }
+html[data-theme="minimal"] .dashboard-page .stat-card.accent * { color: white !important; }
+
+/* ==================================================
+   THEME 2: Dark Futuristic AI (Original)
+   ================================================== */
+html[data-theme="futuristic"] {
+  --t-bg: #090d18;
+  --t-panel: rgba(18,25,43,.78);
+  --t-line: rgba(151,177,219,.16);
+  --t-text: #f4f7ff;
+  --t-muted: #8d9bb8;
+  --t-primary: #62e6e2;
+  --t-secondary: #ff6b9d;
+  --t-radius: 16px;
+  --t-shadow: 0 22px 80px #00000026;
+  --t-border: 1px solid var(--t-line);
+  --t-backdrop: blur(22px);
+  --t-font: 'DM Sans', sans-serif;
+  --t-heading: 'Space Grotesk', sans-serif;
+}
+html[data-theme="futuristic"] .dashboard-page {
+  background: radial-gradient(circle at 78% 2%,#1c2447 0,transparent 30%),radial-gradient(circle at 12% 88%,#19203a 0,transparent 28%), var(--t-bg) !important;
+}
+
+/* ==================================================
+   THEME 3: Soft Gradient / Gen-Z
+   ================================================== */
+html[data-theme="gradient"] {
+  --t-bg: linear-gradient(135deg, #ffdde1, #ee9ca7, #a1c4fd, #c2e9fb);
+  --t-panel: rgba(255, 255, 255, 0.75);
+  --t-line: rgba(255,255,255,0.8);
+  --t-text: #4a4a4a;
+  --t-muted: #7a7a7a;
+  --t-primary: #a18cd1;
+  --t-secondary: #ffb199;
+  --t-radius: 24px;
+  --t-shadow: 0 10px 40px rgba(0,0,0,0.05);
+  --t-border: 2px solid rgba(255,255,255,0.9);
+  --t-backdrop: blur(16px);
+  --t-font: 'Quicksand', sans-serif;
+  --t-heading: 'Fredoka One', 'Quicksand', sans-serif;
+}
+html[data-theme="gradient"] .dashboard-page {
+  background-attachment: fixed !important;
+}
+
+/* ==================================================
+   THEME 4: Glassmorphism
+   ================================================== */
+html[data-theme="glass"] {
+  --t-bg: linear-gradient(45deg, #0f2027, #203a43, #2c5364);
+  --t-panel: rgba(255, 255, 255, 0.05);
+  --t-line: rgba(255, 255, 255, 0.15);
+  --t-text: #ffffff;
+  --t-muted: rgba(255,255,255,0.6);
+  --t-primary: #00f2fe;
+  --t-secondary: #4facfe;
+  --t-radius: 20px;
+  --t-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  --t-border: 1px solid rgba(255, 255, 255, 0.18);
+  --t-backdrop: blur(30px);
+}
+html[data-theme="glass"] .dashboard-page {
+  background-attachment: fixed !important;
+}
+html[data-theme="glass"] .dashboard-page .primary-btn {
+  background: rgba(255,255,255,0.1) !important;
+  color: #fff !important;
+}
+
+/* ==================================================
+   THEME 5: Neo-Brutalism
+   ================================================== */
+html[data-theme="brutal"] {
+  --t-bg: #fffcf2;
+  --t-panel: #ffffff;
+  --t-line: #000000;
+  --t-text: #000000;
+  --t-muted: #333333;
+  --t-primary: #ff5722;
+  --t-secondary: #ffeb3b;
+  --t-radius: 0px;
+  --t-shadow: 6px 6px 0px #000000;
+  --t-border: 3px solid #000000;
+  --t-backdrop: none;
+  --t-font: 'Space Mono', monospace;
+  --t-heading: 'Bebas Neue', 'Space Grotesk', sans-serif;
+}
+html[data-theme="brutal"] .dashboard-page .primary-btn {
+  background: var(--t-secondary) !important;
+  color: #000 !important;
+  font-weight: bold;
+  border-radius: 0 !important;
+}
+html[data-theme="brutal"] .dashboard-page .sidebar {
+  border-right: 4px solid black !important;
+}
+
+/* ==================================================
+   THEME 6: Digital Notebook
+   ================================================== */
+html[data-theme="notebook"] {
+  --t-bg: #fdf6e3;
+  --t-panel: #fffbeb;
+  --t-line: #eaddcf;
+  --t-text: #3c3836;
+  --t-muted: #7c6f64;
+  --t-primary: #d79921;
+  --t-secondary: #cc241d;
+  --t-radius: 4px;
+  --t-shadow: 2px 4px 10px rgba(0,0,0,0.05);
+  --t-border: 1px solid #eaddcf;
+  --t-backdrop: none;
+  --t-font: 'Caveat', cursive;
+  --t-heading: 'Caveat', cursive;
+}
+html[data-theme="notebook"] .dashboard-page {
+  background-image: linear-gradient(#eaddcf 1px, transparent 1px) !important;
+  background-size: 100% 30px !important;
+}
+html[data-theme="notebook"] .dashboard-page * {
+  font-size: 110% !important; /* Handwriting fonts need to be larger */
+}
+
+/* ==================================================
+   THEME 7: Gamified
+   ================================================== */
+html[data-theme="gamified"] {
+  --t-bg: #1a0b2e;
+  --t-panel: #2d1b4e;
+  --t-line: #4c3080;
+  --t-text: #ffffff;
+  --t-muted: #a084d6;
+  --t-primary: #ffd700;
+  --t-secondary: #ff0055;
+  --t-radius: 12px;
+  --t-shadow: 0 10px 0 #150924, inset 0 2px 0 rgba(255,255,255,0.2);
+  --t-border: 2px solid #5a38a3;
+  --t-backdrop: none;
+  --t-font: 'Press Start 2P', 'Space Grotesk', sans-serif;
+  --t-heading: 'Press Start 2P', 'Space Grotesk', sans-serif;
+}
+html[data-theme="gamified"] .dashboard-page .primary-btn {
+  background: #ff0055 !important;
+  box-shadow: 0 4px 0 #990033 !important;
+  color: white !important;
+}
+
+/* ==================================================
+   THEME 8: Premium Dark + Glass
+   ================================================== */
+html[data-theme="premium"] {
+  --t-bg: #0a0a0a;
+  --t-panel: rgba(25, 25, 25, 0.6);
+  --t-line: rgba(255,255,255,0.05);
+  --t-text: #ededed;
+  --t-muted: #888888;
+  --t-primary: #ffffff;
+  --t-secondary: #333333;
+  --t-radius: 14px;
+  --t-shadow: 0 20px 40px rgba(0,0,0,0.4);
+  --t-border: 1px solid rgba(255,255,255,0.08);
+  --t-backdrop: blur(40px);
+  --t-font: 'Inter', sans-serif;
+  --t-heading: 'Inter', sans-serif;
+}
+html[data-theme="premium"] .dashboard-page .primary-btn {
+  background: #ededed !important;
+  color: #000 !important;
+}
+
+/* Theme Selector Dropdown */
+.theme-selector {
+  position: relative;
+  display: inline-block;
+  margin-right: 12px;
+}
+.theme-selector select {
+  appearance: none;
+  background: var(--t-panel);
+  color: var(--t-text);
+  border: var(--t-border);
+  padding: 6px 28px 6px 12px;
+  border-radius: var(--t-radius);
+  font-family: var(--t-font);
+  font-size: 13px;
+  cursor: pointer;
+  outline: none;
+}
+.theme-selector::after {
+  content: '▼';
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--t-muted);
+  pointer-events: none;
+  font-size: 10px;
+}
+
+
+/* Chatbot UI Theme Overrides */
+.chatbot-window {
+  background: var(--t-panel) !important;
+  border: var(--t-border) !important;
+  backdrop-filter: var(--t-backdrop) !important;
+  border-radius: var(--t-radius) !important;
+}
+.chatbot-header {
+  background: var(--t-primary) !important;
+  color: #fff !important;
+  border-top-left-radius: calc(var(--t-radius) - 2px) !important;
+  border-top-right-radius: calc(var(--t-radius) - 2px) !important;
+}
+.chatbot-messages {
+  background: transparent !important;
+}
+.chatbot-input {
+  background: var(--t-panel) !important;
+  border-top: var(--t-border) !important;
+}
+.chatbot-input input {
+  color: var(--t-text) !important;
+  background: transparent !important;
+}

@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en" data-theme="notebook">
+  <head>
+    
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Personal Diary - Smart Learning</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/app.css">
+    <link rel="stylesheet" href="/css/dashboard.css">
+    <link rel="stylesheet" href="/css/themes.css">
+    <link rel="stylesheet" href="/css/toast.css">
+    <link rel="stylesheet" href="/css/diary.css">
+  </head>
+  <body class="dashboard-page">
+    <div class="toast" id="toast" role="status"></div>
+    <div class="sidebar-overlay"></div>
+    <div class="app-shell" id="app-shell" hidden>
+      <aside class="sidebar">
+        <div class="brand"><div class="brand-mark">SL</div><b>Smart</b>Learning</div>
+        <a class="profile-mini profile-link" href="/settings.html#account" aria-label="Open profile and settings"><div class="avatar" data-profile-initials>SL</div><div><strong data-profile-name>Student</strong><small>Profile &amp; settings</small></div><span class="status-dot"></span></a>
+        <nav aria-label="Main navigation">
+          <p class="nav-label">Workspace</p>
+          <a class="nav-item " href="/"><span>📊</span> Overview</a>
+          <a class="nav-item " href="/ai-teacher.html"><span>🤖</span> AI Teacher</a>
+          <a class="nav-item " href="/scan-learn.html"><span>📸</span> Scan & Learn</a>
+          <a class="nav-item " href="/study-planner.html"><span>📅</span> Study planner</a>
+          
+          <p class="nav-label">Learn</p>
+          <a class="nav-item " href="/classroom.html"><span>📚</span> Subjects</a>
+          <a class="nav-item " href="/quiz.html"><span>🎯</span> Quizzes</a>
+          <a class="nav-item " href="/groups.html"><span>👥</span> Study Groups</a>
+          <a class="nav-item " href="/analytics.html"><span>📈</span> Analytics & Gamification</a>
+          
+          <p class="nav-label">Personal</p>
+          <a class="nav-item active" href="/diary.html"><span>📔</span> Personal Diary</a>
+        </nav>
+        <div class="sidebar-foot">
+          <button class="sign-out-button" id="sign-out-button" type="button">👋 Sign out</button>
+        </div>
+      </aside>
+      
+      <main class="main-content" id="dashboard">
+        <header class="topbar">
+          <button class="mobile-menu" aria-label="Open menu">🍔</button>
+          <div class="breadcrumbs">Personal <span>/</span> Personal Diary</div>
+          <div class="top-actions">
+            <a class="avatar small profile-avatar-link" href="/settings.html#account" aria-label="Open profile and settings" data-profile-initials>SL</a>
+          </div>
+        </header>
+
+        <section class="diary-container reveal">
+          
+          <div class="diary-layout">
+            <!-- Left Sidebar -->
+            <div class="diary-sidebar">
+              <div class="diary-panel">
+                <p class="eyebrow">YOUR THOUGHTS</p>
+                <h2 style="margin: 0 0 16px 0; font-size: 24px;">Personal Diary</h2>
+                
+                <input type="text" id="diary-search" class="diary-search-input" placeholder="Search entries, tags, mood...">
+                
+                <div class="diary-stat-row">
+                  <div class="diary-stat" style="flex:1;">
+                    <span>STREAK</span>
+                    <strong id="diary-streak">0 days 🔥</strong>
+                  </div>
+                  <div class="diary-stat" style="flex:1;">
+                    <span>ENTRIES</span>
+                    <strong id="diary-total">0</strong>
+                  </div>
+                </div>
+
+                <div class="diary-calendar" id="diary-calendar">
+                  <div class="calendar-day-header">S</div><div class="calendar-day-header">M</div><div class="calendar-day-header">T</div><div class="calendar-day-header">W</div><div class="calendar-day-header">T</div><div class="calendar-day-header">F</div><div class="calendar-day-header">S</div>
+                  <!-- Calendar days injected by JS -->
+                </div>
+              </div>
+
+              <div class="diary-panel">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;">
+                  <h3 style="margin:0; font-size: 14px;">Recent Entries</h3>
+                  <button id="new-entry-btn" class="primary-btn" style="padding: 4px 12px; font-size: 12px;">+ New</button>
+                </div>
+                <div class="recent-entries" id="recent-entries">
+                  <p class="muted" style="font-size: 13px;">Loading entries...</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Editor -->
+            <div class="diary-editor-panel" id="diary-editor-panel">
+              <!-- Lock Overlay -->
+              <div class="diary-lock-overlay hidden" id="diary-lock-overlay">
+                <div class="lock-icon">🔒</div>
+                <h2>Diary Locked</h2>
+                <p class="muted">Enter your PIN to access your private journal</p>
+                <div class="pin-input-group">
+                  <input type="password" class="pin-digit" maxlength="1" id="pin-1">
+                  <input type="password" class="pin-digit" maxlength="1" id="pin-2">
+                  <input type="password" class="pin-digit" maxlength="1" id="pin-3">
+                  <input type="password" class="pin-digit" maxlength="1" id="pin-4">
+                </div>
+                <button class="primary-btn" id="unlock-btn">Unlock</button>
+              </div>
+
+              <div class="editor-topbar">
+                <div class="editor-meta">
+                  <span class="editor-date" id="editor-date-display">Today</span>
+                  <span class="save-status saved" id="save-status">Saved</span>
+                </div>
+                <div class="editor-actions">
+                  <button class="icon-btn-diary" id="ai-assistant-btn" title="AI Assistant">✨</button>
+                  <button class="icon-btn-diary" id="favorite-btn" title="Favorite">⭐</button>
+                  <button class="icon-btn-diary" id="export-btn" title="Export">📥</button>
+                  <button class="icon-btn-diary" id="delete-btn" title="Delete">🗑️</button>
+                </div>
+              </div>
+
+              <!-- AI Assistant Overlay -->
+              <div class="ai-diary-panel" id="ai-diary-panel">
+                <h4 style="margin:0 0 8px 0; color: var(--t-primary);">✨ AI Diary Assistant</h4>
+                <p class="muted" style="margin:0; font-size:13px;">How can I help you reflect on this entry?</p>
+                <div class="ai-diary-chips">
+                  <button class="ai-chip" data-action="summarize">Summarize Entry</button>
+                  <button class="ai-chip" data-action="improve">Improve Writing</button>
+                  <button class="ai-chip" data-action="reflect">Create Study Reflection</button>
+                  <button class="ai-chip" data-action="title">Generate Title</button>
+                </div>
+                <div class="ai-result hidden" id="ai-result"></div>
+              </div>
+
+              <input type="text" id="diary-title" class="diary-title-input" placeholder="Title your entry...">
+              
+              <div class="mood-selector" id="mood-selector">
+                <button class="mood-btn" data-mood="😊 Happy">😊 Happy</button>
+                <button class="mood-btn" data-mood="😄 Excited">😄 Excited</button>
+                <button class="mood-btn" data-mood="😌 Calm">😌 Calm</button>
+                <button class="mood-btn" data-mood="😐 Normal">😐 Normal</button>
+                <button class="mood-btn" data-mood="😔 Sad">😔 Sad</button>
+                <button class="mood-btn" data-mood="😡 Angry">😡 Angry</button>
+                <button class="mood-btn" data-mood="😰 Stressed">😰 Stressed</button>
+                <button class="mood-btn" data-mood="🤩 Motivated">🤩 Motivated</button>
+                <button class="mood-btn" data-mood="😴 Tired">😴 Tired</button>
+              </div>
+
+              <div class="editor-toolbar" id="editor-toolbar">
+                <button class="toolbar-btn" data-command="bold"><b>B</b></button>
+                <button class="toolbar-btn" data-command="italic"><i>I</i></button>
+                <button class="toolbar-btn" data-command="underline"><u>U</u></button>
+                <button class="toolbar-btn" data-command="insertUnorderedList">•</button>
+                <button class="toolbar-btn" data-command="insertOrderedList">1.</button>
+                <button class="toolbar-btn" data-command="formatBlock" data-value="H2">H2</button>
+                <button class="toolbar-btn" data-command="formatBlock" data-value="BLOCKQUOTE">”</button>
+              </div>
+
+              <div id="diary-content" class="diary-rich-content" contenteditable="true" placeholder="Write your thoughts, reflections, or notes for today..."></div>
+
+              <div class="tags-input-container">
+                <span style="font-size: 14px; color: var(--t-muted);">Tags:</span>
+                <div id="tags-list" style="display:flex; gap:6px; flex-wrap:wrap;"></div>
+                <input type="text" id="tag-input" placeholder="Add a tag...">
+              </div>
+
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+    
+    <div class="dashboard-loading" id="loading-screen">
+      <div class="brand-mark" style="margin-bottom: 20px; animation: wave 2s infinite;">SL</div>
+      Loading your diary...
+    </div>
+
+    <script type="module" src="/js/app.js"></script>
+    <script type="module" src="/js/diary.js"></script>
+  </body>
+</html>

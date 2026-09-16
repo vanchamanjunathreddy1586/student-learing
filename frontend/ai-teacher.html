@@ -1,1 +1,118 @@
-<!doctype html><html><head><meta charset="utf-8"><title>AI Teacher</title><link rel="stylesheet" href="/css/page.css"></head><body><main class="page"><nav class="page-nav"><a class="page-brand" href="/">smart <span>learning</span></a><a href="/">Overview</a></nav><section class="panel"><p class="eyebrow">AI TEACHER</p><h1>Ask, explore, understand.</h1><p>Use the overview's tutor panel for context-aware chat, or connect a provider in AI settings.</p><a class="action" href="/">Open tutor</a></section></main></body></html>
+<!doctype html>
+<html lang="en" data-theme="futuristic">
+<head>
+    
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
+  <title>Student Learning | AI Teacher</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/app.css">
+  <link rel="stylesheet" href="/css/dashboard.css">
+    <link rel="stylesheet" href="/css/themes.css">
+  <link rel="stylesheet" href="/css/toast.css">
+  <style>
+    .chat-container { display: flex; flex-direction: column; height: calc(100vh - 150px); max-width: 800px; margin: 0 auto; background: var(--dash-panel); border-radius: 16px; border: 1px solid var(--dash-line); overflow: hidden; box-shadow: 0 12px 30px rgba(0,0,0,0.3); }
+    .chat-messages { flex: 1; padding: 24px; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; scroll-behavior: smooth; }
+    .chat-bubble { max-width: 80%; padding: 14px 18px; border-radius: 18px; font-size: 14px; line-height: 1.5; position: relative; }
+    .chat-bubble.user { background: linear-gradient(135deg, var(--dash-pink), #c054ff); color: white; align-self: flex-end; border-bottom-right-radius: 4px; box-shadow: 0 4px 12px rgba(255, 107, 157, 0.2); }
+    .chat-bubble.ai { background: rgba(255,255,255,0.05); color: var(--dash-text); border: 1px solid var(--dash-line); align-self: flex-start; border-bottom-left-radius: 4px; }
+    .chat-bubble.system { background: transparent; color: var(--dash-muted); align-self: center; font-size: 12px; text-align: center; }
+    
+    .chat-input-area { padding: 16px 24px; border-top: 1px solid var(--dash-line); background: rgba(8,13,26,0.5); display: flex; gap: 12px; align-items: flex-end; }
+    .chat-input-wrapper { flex: 1; background: rgba(255,255,255,0.05); border: 1px solid var(--dash-line); border-radius: 24px; padding: 4px 16px; display: flex; align-items: center; transition: border-color 0.2s; }
+    .chat-input-wrapper:focus-within { border-color: var(--dash-cyan); }
+    .chat-input-wrapper textarea { width: 100%; background: transparent; border: 0; outline: 0; color: var(--dash-text); padding: 10px 0; resize: none; max-height: 100px; font-family: inherit; font-size: 14px; }
+    
+    .icon-btn.primary { background: var(--dash-cyan); color: #000; width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; cursor: pointer; border: 0; transition: transform 0.2s; }
+    .icon-btn.primary:hover { transform: scale(1.05); }
+    .icon-btn.primary:disabled { background: var(--dash-muted); cursor: not-allowed; transform: none; }
+    
+    .voice-btn { background: transparent; border: 0; color: var(--dash-muted); cursor: pointer; font-size: 18px; padding: 10px; transition: color 0.2s; }
+    .voice-btn:hover { color: var(--dash-pink); }
+    .voice-btn.recording { color: var(--dash-pink); animation: pulse 1.5s infinite; }
+    
+    .controls-row { padding: 10px 24px; display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.2); font-size: 11px; color: var(--dash-muted); border-top: 1px solid var(--dash-line); }
+    .toggle-switch { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+    .toggle-switch input { display: none; }
+    .toggle-slider { width: 32px; height: 18px; background: rgba(255,255,255,0.1); border-radius: 10px; position: relative; transition: background 0.3s; }
+    .toggle-slider::after { content: ''; position: absolute; width: 14px; height: 14px; background: white; border-radius: 50%; top: 2px; left: 2px; transition: transform 0.3s; }
+    .toggle-switch input:checked + .toggle-slider { background: var(--dash-cyan); }
+    .toggle-switch input:checked + .toggle-slider::after { transform: translateX(14px); }
+
+    .tts-btn { position: absolute; bottom: 8px; right: -30px; background: none; border: 0; color: var(--dash-muted); cursor: pointer; font-size: 14px; }
+    .tts-btn:hover { color: var(--dash-cyan); }
+    .tts-btn.playing { color: var(--dash-cyan); animation: pulse 1.5s infinite; }
+
+    @keyframes pulse {
+      0% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.1); opacity: 0.7; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+  </style>
+</head>
+<body class="dashboard-page">
+  <div class="app-shell" id="dashboard-shell">
+    <div class="sidebar-overlay"></div>
+      <aside class="sidebar">
+      <div class="brand"><span class="brand-mark">✦</span><span>smart<br><b>learning</b></span></div>
+      <a class="profile-mini profile-link" href="/settings.html#account" aria-label="Open profile and settings"><div class="avatar" data-profile-initials>SL</div><div><strong data-profile-name>Student</strong><small>Profile &amp; settings</small></div><span class="status-dot"></span></a>
+      <nav aria-label="Main navigation">
+          <p class="nav-label">Workspace</p>
+          <a class="nav-item " href="/"><span>🏠</span> Overview</a>
+          <a class="nav-item active" href="/ai-teacher.html"><span>🤖</span> AI Teacher</a>
+          <a class="nav-item " href="/scan-learn.html"><span>📷</span> Scan & Learn</a>
+          <a class="nav-item " href="/study-planner.html"><span>📅</span> Study planner</a>
+          
+          <p class="nav-label">Learn</p>
+          <a class="nav-item " href="/classroom.html"><span>📚</span> Subjects</a>
+          <a class="nav-item " href="/quiz.html"><span>📝</span> Quizzes</a>
+          <a class="nav-item " href="/groups.html"><span>👥</span> Study Groups</a>
+          <a class="nav-item " href="/analytics.html"><span>📊</span> Analytics & Gamification</a>
+          
+          <p class="nav-label">Personal</p>
+          <a class="nav-item " href="/diary.html"><span>📔</span> Student Diary</a>
+        </nav>
+    </aside>
+    <main class="main-content">
+      <header class="topbar">
+        <button class="mobile-menu" aria-label="Open menu">☰</button>
+        <div class="breadcrumbs">Workspace <span>/</span> AI Teacher</div>
+        <div class="top-actions">
+        <a class="avatar small profile-avatar-link" href="/settings.html#account" data-profile-initials>SL</a></div>
+      </header>
+
+      <section style="padding-top: 20px;">
+        <div class="chat-container">
+          <div class="chat-messages" id="chat-messages">
+            <div class="chat-bubble system">Your AI Teacher is ready. Ask a question or use voice to speak!</div>
+            <div class="chat-bubble ai">Hello! I'm your Smart Learning AI Teacher. What would you like to learn today?</div>
+          </div>
+          
+          <div class="controls-row">
+            <span>Powered by <strong id="provider-label">AI</strong></span>
+            <label class="toggle-switch">
+              <input type="checkbox" id="auto-speak-toggle">
+              <span class="toggle-slider"></span>
+              Auto-Speak Responses
+            </label>
+          </div>
+          
+          <div class="chat-input-area">
+            <div class="chat-input-wrapper">
+              <textarea id="chat-input" placeholder="Type or say something..." rows="1"></textarea>
+              <button class="voice-btn" id="voice-btn" title="Hold to speak">🎤</button>
+            </div>
+            <button class="icon-btn primary" id="send-btn">➤</button>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+  <div class="toast" id="toast" role="status"></div>
+  <script type="module" src="/js/supabase.js"></script>
+  <script type="module" src="/js/ai-teacher.js"></script>
+<script type="module" src="/js/app.js"></script>
+</body>
+</html>

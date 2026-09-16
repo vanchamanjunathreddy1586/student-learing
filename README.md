@@ -1,33 +1,25 @@
-# Smart Learning
+# Smart Learning Platform 🚀
 
-A production-style, provider-neutral AI classroom prototype. The frontend only calls the Flask API; provider credentials stay server-side.
+A comprehensive, AI-powered learning ecosystem built for students. 
 
-## Run locally
+## Features
+* **Adaptive Quizzes:** AI-generated quizzes that adapt to your topic inputs, grade automatically, and log progress.
+* **Scan & Learn:** Upload documents, PDFs, or images and let AI summarize the key concepts and generate immediate practice material.
+* **AI Teacher:** A voice-activated tutor powered by OpenAI, Gemini, Anthropic, or Ollama. Ask questions with your voice and get text-to-speech spoken answers back!
+* **Classroom Dashboard:** Manage your subjects, topics, and track mastery percentages dynamically.
+* **Smart Study Planner:** Focus sessions, daily streaks, gamification points, and activity tracking.
 
-```powershell
-Copy-Item .env.example .env
-npm install
-npm start
-```
+## Getting Started
 
-Open http://localhost:5000. With no provider configured, the isolated demo provider keeps local development functional. Add `OPENAI_API_KEY` or run Ollama to use a real model.
-
-## Supabase setup
-
-1. Create a Supabase project and run `supabase/migrations/001_initial_schema.sql` in its SQL editor.
-2. Copy the project URL and publishable key into `SUPABASE_URL` and `SUPABASE_PUBLISHABLE_KEY` in `.env`.
-3. Enable Email provider authentication in Supabase Authentication settings.
-
-For direct PostgreSQL access, set `DATABASE_URL` using the template in `.env.example`. Percent-encode special characters in the database password, and never commit the completed connection string.
-
-The login and registration pages use Supabase Auth directly. The Flask API validates the resulting bearer token when protected endpoints are added.
+1. Set up a Supabase project and create the necessary tables.
+2. Run all SQL migrations located in `supabase/migrations/` sequentially via the Supabase SQL editor.
+   * *Make sure to run `006_smart_learning_core.sql` for the core schema.*
+3. Copy `.env.example` to `.env` and fill in your Supabase keys and AI provider keys.
+4. Run `npm install` and `npm start`.
+5. Access the app at `http://localhost:5000`.
 
 ## Architecture
-
-- `frontend/`: responsive vanilla JS classroom experience
-- `server/`: Node.js Express API and Supabase authentication
-- `backend/services/ai_gateway/`: legacy Python AI gateway implementation
-- `supabase/migrations/`: PostgreSQL tables and RLS policies
-- `/api/ai/providers`: capability and availability metadata, never secrets
-
-Supabase is the intended primary database. The JavaScript server falls back to the demo provider when Supabase credentials are not present, so the UX remains testable without infrastructure.
+- **Frontend:** Vanilla JS, HTML, CSS with Glassmorphism and dark themes. Mobile responsive.
+- **Backend:** Node.js with Express.
+- **Database:** Supabase PostgreSQL with Row-Level Security (RLS) policies.
+- **AI Gateway:** Custom routing layer for Ollama, OpenAI, and Gemini.

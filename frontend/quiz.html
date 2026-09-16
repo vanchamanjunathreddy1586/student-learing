@@ -1,1 +1,135 @@
-<!doctype html><html><head><meta charset="utf-8"><title>Quiz engine</title><link rel="stylesheet" href="/css/page.css"></head><body><main class="page"><nav class="page-nav"><a class="page-brand" href="/">smart <span>learning</span></a><a href="/">Overview</a></nav><section class="panel"><p class="eyebrow">ADAPTIVE QUIZ</p><h1>Test what you know.</h1><p>Choose a topic, difficulty, and question type. Generated questions are validated before display.</p><button class="action" data-action>Generate quiz</button></section></main><script src="/js/page.js"></script></body></html>
+<!doctype html>
+<html lang="en" data-theme="brutal">
+<head>
+    
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
+  <title>Student Learning | Adaptive Quiz</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/app.css">
+  <link rel="stylesheet" href="/css/dashboard.css">
+    <link rel="stylesheet" href="/css/themes.css">
+  <link rel="stylesheet" href="/css/toast.css">
+  <style>
+    .quiz-container { max-width: 600px; margin: 40px auto; background: var(--dash-panel); padding: 40px; border-radius: 16px; border: 1px solid var(--dash-line); color: var(--dash-text); box-shadow: 0 12px 30px rgba(0,0,0,0.3); }
+    .quiz-header { text-align: center; margin-bottom: 30px; }
+    .quiz-topic { color: var(--dash-cyan); font-weight: bold; letter-spacing: 1px; font-size: 12px; text-transform: uppercase; margin-bottom: 10px; display: block; }
+    .question-text { font-size: 22px; font-family: 'Space Grotesk'; font-weight: 600; line-height: 1.4; margin-bottom: 30px; }
+    
+    .options { display: flex; flex-direction: column; gap: 12px; }
+    .option-btn { background: rgba(255,255,255,0.05); border: 1px solid var(--dash-line); padding: 16px; border-radius: 12px; color: var(--dash-text); font-size: 16px; text-align: left; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; }
+    .option-btn::before { content: attr(data-letter); margin-right: 15px; display: grid; place-items: center; width: 28px; height: 28px; background: rgba(255,255,255,0.1); border-radius: 6px; font-size: 12px; font-weight: bold; }
+    .option-btn:hover:not(:disabled) { background: rgba(255,255,255,0.1); border-color: var(--dash-cyan); }
+    
+    .option-btn.correct { background: rgba(98, 230, 226, 0.1); border-color: var(--dash-cyan); color: var(--dash-cyan); }
+    .option-btn.incorrect { background: rgba(255, 107, 157, 0.1); border-color: var(--dash-pink); color: var(--dash-pink); }
+    
+    .quiz-footer { margin-top: 30px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--dash-line); padding-top: 20px; }
+    .explanation { margin-top: 20px; padding: 15px; background: rgba(255,255,255,0.05); border-radius: 8px; font-size: 14px; line-height: 1.5; display: none; }
+    .explanation.show { display: block; }
+    .explanation strong { color: var(--dash-cyan); }
+    
+    .results-view { text-align: center; }
+    .score-circle { width: 120px; height: 120px; border-radius: 50%; border: 6px solid var(--dash-cyan); display: grid; place-items: center; font-size: 32px; font-family: 'Space Grotesk'; font-weight: 700; margin: 0 auto 20px; }
+    
+    #loading-state { text-align: center; padding: 60px 0; display: none; }
+    .spinner { border: 4px solid rgba(255,255,255,0.1); width: 40px; height: 40px; border-radius: 50%; border-left-color: var(--dash-cyan); animation: spin 1s linear infinite; margin: 0 auto 20px; }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+  </style>
+</head>
+<body class="dashboard-page">
+  <div class="app-shell" id="dashboard-shell">
+    <div class="sidebar-overlay"></div>
+      <aside class="sidebar">
+      <div class="brand"><span class="brand-mark">✦</span><span>smart<br><b>learning</b></span></div>
+      <a class="profile-mini profile-link" href="/settings.html#account" aria-label="Open profile and settings"><div class="avatar" data-profile-initials>SL</div><div><strong data-profile-name>Student</strong><small>Profile &amp; settings</small></div><span class="status-dot"></span></a>
+      <nav aria-label="Main navigation">
+          <p class="nav-label">Workspace</p>
+          <a class="nav-item " href="/"><span>🏠</span> Overview</a>
+          <a class="nav-item " href="/ai-teacher.html"><span>🤖</span> AI Teacher</a>
+          <a class="nav-item " href="/scan-learn.html"><span>📷</span> Scan & Learn</a>
+          <a class="nav-item " href="/study-planner.html"><span>📅</span> Study planner</a>
+          
+          <p class="nav-label">Learn</p>
+          <a class="nav-item " href="/classroom.html"><span>📚</span> Subjects</a>
+          <a class="nav-item active" href="/quiz.html"><span>📝</span> Quizzes</a>
+          <a class="nav-item " href="/groups.html"><span>👥</span> Study Groups</a>
+          <a class="nav-item " href="/analytics.html"><span>📊</span> Analytics & Gamification</a>
+          
+          <p class="nav-label">Personal</p>
+          <a class="nav-item " href="/diary.html"><span>📔</span> Student Diary</a>
+        </nav>
+    </aside>
+    <main class="main-content">
+      <header class="topbar">
+        <button class="mobile-menu" aria-label="Open menu">☰</button>
+        <div class="breadcrumbs">Learn <span>/</span> Adaptive Quiz</div>
+        <div class="top-actions">
+        <a class="avatar small profile-avatar-link" href="/settings.html#account" data-profile-initials>SL</a></div>
+      </header>
+
+      <div id="setup-view" class="quiz-container">
+        <div class="quiz-header">
+          <h2>Start an Adaptive Quiz</h2>
+          <p class="muted">Test your knowledge. Questions will adapt to your skill level.</p>
+        </div>
+        <form id="start-quiz-form">
+          <div style="margin-bottom: 20px;">
+            <label style="display:block; margin-bottom:8px; color:var(--dash-muted); font-size:12px;">Topic to practice</label>
+            <input type="text" id="quiz-topic-input" required placeholder="e.g. Binary Search Trees" style="width:100%; padding:14px; background:rgba(255,255,255,0.05); border:1px solid var(--dash-line); border-radius:8px; color:white; font-size:16px;">
+          </div>
+          <button type="submit" class="primary-btn" style="width:100%; padding:14px; font-size:16px;">Generate AI Quiz</button>
+        </form>
+      </div>
+
+      <div id="loading-state" class="quiz-container">
+        <div class="spinner"></div>
+        <h3>Generating adaptive questions...</h3>
+        <p class="muted">Analyzing your topic and formulating questions.</p>
+      </div>
+
+      <div id="quiz-view" class="quiz-container" style="display: none;">
+        <div class="quiz-header">
+          <span class="quiz-topic" id="quiz-topic-label">TOPIC</span>
+          <div style="display:flex; justify-content:space-between; font-size:12px; color:var(--dash-muted); margin-bottom:20px;">
+            <span id="question-counter">Question 1 of 5</span>
+            <span id="score-counter">Score: 0</span>
+          </div>
+          <div class="progress" style="margin-bottom: 20px;"><i id="quiz-progress" style="width:20%"></i></div>
+          <div class="question-text" id="question-text">Loading question...</div>
+        </div>
+        
+        <div class="options" id="options-container">
+          <!-- Populated by JS -->
+        </div>
+        
+        <div class="explanation" id="explanation-box"></div>
+        
+        <div class="quiz-footer">
+          <span style="font-size:11px; color:var(--dash-muted);">Generated by <span id="ai-provider-name">AI</span></span>
+          <button id="next-btn" class="primary-btn" style="display:none;">Next Question →</button>
+        </div>
+      </div>
+
+      <div id="results-view" class="quiz-container" style="display: none;">
+        <div class="results-view">
+          <p class="eyebrow">QUIZ COMPLETE</p>
+          <div class="score-circle" id="final-score">80%</div>
+          <h2 id="result-message" style="margin-bottom: 10px;">Great job!</h2>
+          <p class="muted" id="result-submessage" style="margin-bottom: 30px;">You've shown strong mastery in this topic.</p>
+          
+          <button class="primary-btn" onclick="location.reload()" style="margin-right: 10px;">Take Another Quiz</button>
+          <button class="btn-secondary" style="border: 1px solid var(--dash-line); background: transparent; color: white; padding: 13px 17px; border-radius: 8px; cursor: pointer;" onclick="location.href='/classroom.html'">Return to Subjects</button>
+        </div>
+      </div>
+
+    </main>
+  </div>
+  <div class="toast" id="toast" role="status"></div>
+  <script type="module" src="/js/supabase.js"></script>
+  <script type="module" src="/js/quiz.js"></script>
+<script type="module" src="/js/app.js"></script>
+</body>
+</html>
