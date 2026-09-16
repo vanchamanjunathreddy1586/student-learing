@@ -318,3 +318,6 @@ html[data-theme="premium"] .dashboard-page .primary-btn {
 
 .theme-selector select option { background-color: #1a1a1a; color: #ffffff; }
 
+
+select option { background-color: #000000 !important; color: #ffffff !important; }
+
