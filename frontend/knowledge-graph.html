@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en" data-theme="premium">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
+  <title>Knowledge Graph | Smart Learning</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/app.css">
+  <link rel="stylesheet" href="/css/dashboard.css">
+  <link rel="stylesheet" href="/css/themes.css">
+  <link rel="stylesheet" href="/css/toast.css">
+  <link rel="stylesheet" href="/css/knowledge.css">
+  <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+</head>
+<body class="dashboard-page">
+  <div class="toast" id="toast" role="status"></div>
+  <div class="sidebar-overlay"></div>
+  <div class="app-shell" id="dashboard-shell">
+    <aside class="sidebar">
+      <div class="brand"><span class="brand-mark">SL</span><span>smart<br><b>learning</b></span></div>
+      <a class="profile-mini profile-link" href="/settings.html#account"><div class="avatar" data-profile-initials>SL</div><div><strong data-profile-name>Student</strong><small>Profile &amp; settings</small></div><span class="status-dot"></span></a>
+      <nav aria-label="Main navigation">
+          <p class="nav-label">Workspace</p>
+          <a class="nav-item" href="/"><span>🏠</span> Overview</a>
+          <a class="nav-item" href="/ai-teacher.html"><span>🤖</span> AI Teacher</a>
+          <a class="nav-item" href="/scan-learn.html"><span>📸</span> Scan & Learn</a>
+          <a class="nav-item" href="/study-planner.html"><span>📅</span> Study planner</a>
+          
+          <p class="nav-label">Learn</p>
+          <a class="nav-item" href="/classroom.html"><span>📚</span> Subjects</a>
+          <a class="nav-item" href="/quiz.html"><span>📝</span> Quizzes</a>
+          <a class="nav-item" href="/groups.html"><span>👥</span> Study Groups</a>
+          <a class="nav-item" href="/analytics.html"><span>📈</span> Analytics</a>
+          
+          <p class="nav-label">Personal</p>
+          <a class="nav-item" href="/diary.html"><span>📔</span> Personal Diary</a>
+          <a class="nav-item" href="/knowledge.html"><span>🧠</span> Knowledge Vault</a>
+          <a class="nav-item active" href="/knowledge-graph.html"><span>🕸️</span> Knowledge Graph</a>
+        </nav>
+      <div class="sidebar-foot">
+        <button class="sign-out-button" id="sign-out-button" type="button">🚪 Sign out</button>
+      </div>
+    </aside>
+    <main class="main-content" style="display:flex; flex-direction:column; height: 100vh;">
+      <header class="topbar">
+        <button class="mobile-menu" aria-label="Open menu">☰</button>
+        <div class="breadcrumbs">Personal <span>/</span> Knowledge Graph</div>
+        <div class="top-actions">
+          <button class="primary-btn" onclick="window.location.href='/knowledge.html'">🧠 Vault View</button>
+        </div>
+      </header>
+      
+      <div class="graph-container" style="flex-grow: 1; position: relative; background: var(--t-bg);">
+        <div id="mynetwork" style="width: 100%; height: 100%;"></div>
+        
+        <!-- Loading Overlay -->
+        <div id="graph-loading" style="position: absolute; top:0; left:0; right:0; bottom:0; display:flex; align-items:center; justify-content:center; background: rgba(0,0,0,0.5); color: white; z-index: 10;">
+          <div style="text-align: center;">
+            <div style="font-size: 2rem; animation: spin 1s linear infinite;">⏳</div>
+            <p class="mt-2">Rendering Graph...</p>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+  
+  <!-- Note Preview Modal -->
+  <div class="modal hidden" id="note-preview-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="preview-title">Note Title</h3>
+        <button class="close-modal" id="close-preview-modal">✕</button>
+      </div>
+      <div class="modal-body">
+        <p class="muted">Links: <span id="preview-links">0</span> | Backlinks: <span id="preview-backlinks">0</span></p>
+        <button class="primary-btn mt-3" id="open-note-btn">Open in Vault</button>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    @keyframes spin { 100% { transform: rotate(360deg); } }
+  </style>
+
+  <script src="/js/supabase.js"></script>
+  <script src="/js/app.js"></script>
+  <script src="/js/knowledge-graph.js"></script>
+</body>
+</html>

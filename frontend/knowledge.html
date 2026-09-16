@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en" data-theme="premium">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
+  <title>Knowledge Vault | Smart Learning</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/app.css">
+  <link rel="stylesheet" href="/css/dashboard.css">
+  <link rel="stylesheet" href="/css/themes.css">
+  <link rel="stylesheet" href="/css/toast.css">
+  <link rel="stylesheet" href="/css/knowledge.css">
+</head>
+<body class="dashboard-page">
+  <div class="toast" id="toast" role="status"></div>
+  <div class="sidebar-overlay"></div>
+  <div class="app-shell" id="dashboard-shell">
+    <aside class="sidebar">
+      <div class="brand"><span class="brand-mark">SL</span><span>smart<br><b>learning</b></span></div>
+      <a class="profile-mini profile-link" href="/settings.html#account"><div class="avatar" data-profile-initials>SL</div><div><strong data-profile-name>Student</strong><small>Profile &amp; settings</small></div><span class="status-dot"></span></a>
+      <nav aria-label="Main navigation">
+          <p class="nav-label">Workspace</p>
+          <a class="nav-item" href="/"><span>🏠</span> Overview</a>
+          <a class="nav-item" href="/ai-teacher.html"><span>🤖</span> AI Teacher</a>
+          <a class="nav-item" href="/scan-learn.html"><span>📸</span> Scan &amp; Learn</a>
+          <a class="nav-item" href="/study-planner.html"><span>📅</span> Study planner</a>
+          
+          <p class="nav-label">Learn</p>
+          <a class="nav-item" href="/classroom.html"><span>📚</span> Subjects</a>
+          <a class="nav-item" href="/quiz.html"><span>📝</span> Quizzes</a>
+          <a class="nav-item" href="/groups.html"><span>👥</span> Study Groups</a>
+          <a class="nav-item" href="/analytics.html"><span>📈</span> Analytics</a>
+          
+          <p class="nav-label">Personal</p>
+          <a class="nav-item" href="/diary.html"><span>📔</span> Personal Diary</a>
+          <a class="nav-item active" href="/knowledge.html"><span>🧠</span> Knowledge Vault</a>
+          <a class="nav-item" href="/knowledge-graph.html"><span>🕸️</span> Knowledge Graph</a>
+        </nav>
+      <div class="sidebar-foot">
+        <button class="sign-out-button" id="sign-out-button" type="button">🚪 Sign out</button>
+      </div>
+    </aside>
+    <main class="main-content">
+      <header class="topbar">
+        <button class="mobile-menu" aria-label="Open menu">☰</button>
+        <div class="breadcrumbs">Personal <span>/</span> Knowledge Vault</div>
+        <div class="top-actions">
+          <button class="primary-btn" onclick="window.location.href='/knowledge-graph.html'">🕸️ Graph View</button>
+        </div>
+      </header>
+      
+      <div class="dashboard-content knowledge-layout">
+        <!-- Left Sidebar: Explorer -->
+        <aside class="kv-explorer">
+          <div class="explorer-header">
+            <div class="search-box">
+              <span>🔍</span>
+              <input type="text" id="kv-search" placeholder="Search notes...">
+            </div>
+            <button class="icon-btn" id="new-note-btn" title="New Note" style="background:var(--t-primary);color:white;border-radius:4px;">➕</button>
+          </div>
+          <div class="explorer-body">
+            <div class="explorer-section">
+              <h4>📁 Folders</h4>
+              <ul id="kv-folders-list" class="explorer-list"></ul>
+            </div>
+            <div class="explorer-section">
+              <h4>📝 Notes</h4>
+              <ul id="kv-notes-list" class="explorer-list">
+                <li class="muted">Loading notes...</li>
+              </ul>
+            </div>
+          </div>
+        </aside>
+  
+        <!-- Center: Editor -->
+        <section class="kv-editor-panel" id="kv-editor-panel">
+          <div class="editor-top">
+            <input type="text" id="note-title" class="note-title-input" placeholder="Untitled Note">
+            <div class="editor-meta">
+              <span id="note-save-status" class="save-status">Unsaved</span>
+              <button class="icon-btn" id="delete-note-btn" title="Delete Note">🗑️</button>
+            </div>
+          </div>
+          <div class="editor-toolbar">
+            <button class="tool-btn" data-cmd="bold"><b>B</b></button>
+            <button class="tool-btn" data-cmd="italic"><i>I</i></button>
+            <button class="tool-btn" data-cmd="formatBlock" data-val="H2">H2</button>
+            <button class="tool-btn" data-cmd="insertUnorderedList">List</button>
+            <button class="tool-btn" id="insert-link-btn" title="Link Note (Type [[ )">🔗</button>
+            <button class="tool-btn ai-btn" id="ai-assistant-btn">✨ AI Assistant</button>
+          </div>
+          <div class="editor-body-wrap">
+            <div id="note-content" class="note-rich-content" contenteditable="true" placeholder="Start typing... use [[ to link to other notes."></div>
+            
+            <!-- Link Suggestions Dropdown -->
+            <div id="link-suggestions" class="link-suggestions hidden">
+              <!-- Populated via JS -->
+            </div>
+          </div>
+        </section>
+  
+        <!-- Right Sidebar: Context (Backlinks) -->
+        <aside class="kv-context-panel">
+          <div class="context-section">
+            <h3>🔗 Linked Mentions</h3>
+            <ul id="backlinks-list" class="context-list">
+              <li class="muted">No backlinks yet.</li>
+            </ul>
+          </div>
+          
+          <div class="context-section">
+            <h3>⚡ Flashcards</h3>
+            <div class="flashcards-preview" id="flashcards-preview">
+              <p class="muted">Generate AI flashcards from this note to memorize key concepts.</p>
+            </div>
+            <button class="primary-btn mt-2" id="generate-flashcards-btn" style="width:100%">
+              ✨ Generate Flashcards
+            </button>
+          </div>
+        </aside>
+      </div>
+    </main>
+  </div>
+  
+  <!-- AI Assistant Modal -->
+  <div class="modal hidden" id="ai-note-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>✨ AI Note Assistant</h3>
+        <button class="close-modal" id="close-ai-modal">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="ai-actions-grid">
+          <button class="secondary-btn ai-action-btn" data-action="summarize">Summarize Note</button>
+          <button class="secondary-btn ai-action-btn" data-action="explain">Explain Simply</button>
+          <button class="secondary-btn ai-action-btn" data-action="questions">Generate Questions</button>
+          <button class="secondary-btn ai-action-btn" data-action="mcqs">Create MCQs</button>
+        </div>
+        <div class="ai-response-area hidden" id="ai-note-response">
+          <!-- Response -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/supabase.js"></script>
+  <script src="/js/app.js"></script>
+  <script src="/js/knowledge.js"></script>
+</body>
+</html>

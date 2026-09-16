@@ -1,0 +1,324 @@
+/* Knowledge Vault Layout */
+.knowledge-layout {
+  display: flex;
+  gap: 16px;
+  height: calc(100vh - 100px); /* Fill remaining viewport */
+  overflow: hidden;
+  padding: 0 16px 16px 16px;
+}
+
+/* Left Sidebar - Explorer */
+.kv-explorer {
+  width: 250px;
+  min-width: 250px;
+  background: var(--t-panel);
+  border-radius: var(--t-radius);
+  border: var(--t-border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.explorer-header {
+  padding: 12px;
+  border-bottom: var(--t-border);
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.explorer-header .search-box {
+  flex-grow: 1;
+  position: relative;
+}
+
+.explorer-header .search-box input {
+  width: 100%;
+  padding: 6px 8px 6px 30px;
+  border-radius: var(--t-radius);
+  border: var(--t-border);
+  background: var(--t-bg);
+  color: var(--t-text);
+  font-size: 13px;
+}
+
+.explorer-header .search-box i {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--t-muted);
+  font-size: 13px;
+}
+
+.explorer-body {
+  flex-grow: 1;
+  overflow-y: auto;
+  padding: 12px;
+}
+
+.explorer-section {
+  margin-bottom: 20px;
+}
+
+.explorer-section h4 {
+  font-size: 12px;
+  text-transform: uppercase;
+  color: var(--t-muted);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.explorer-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.explorer-list li {
+  padding: 6px 8px;
+  margin-bottom: 4px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--t-text);
+  transition: all 0.2s;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.explorer-list li:hover {
+  background: var(--t-bg);
+}
+
+.explorer-list li.active {
+  background: var(--t-primary);
+  color: white;
+}
+
+/* Center Editor Panel */
+.kv-editor-panel {
+  flex-grow: 1;
+  background: var(--t-panel);
+  border-radius: var(--t-radius);
+  border: var(--t-border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.editor-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
+  border-bottom: var(--t-border);
+}
+
+.note-title-input {
+  flex-grow: 1;
+  font-size: 24px;
+  font-weight: 700;
+  background: transparent;
+  border: none;
+  color: var(--t-text);
+  outline: none;
+}
+
+.editor-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.save-status {
+  font-size: 13px;
+  color: var(--t-muted);
+}
+.save-status.saving { color: var(--t-warning); }
+.save-status.saved { color: var(--t-success); }
+
+.editor-toolbar {
+  padding: 8px 24px;
+  background: var(--t-bg);
+  border-bottom: var(--t-border);
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.tool-btn {
+  background: transparent;
+  border: none;
+  color: var(--t-text);
+  cursor: pointer;
+  padding: 6px 8px;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.tool-btn:hover {
+  background: var(--t-panel);
+}
+
+.ai-btn {
+  background: rgba(139, 92, 246, 0.1);
+  color: #8b5cf6;
+  font-weight: 600;
+  margin-left: auto;
+}
+.ai-btn:hover { background: rgba(139, 92, 246, 0.2); }
+
+.editor-body-wrap {
+  flex-grow: 1;
+  position: relative;
+  overflow-y: auto;
+  padding: 24px;
+}
+
+.note-rich-content {
+  min-height: 100%;
+  outline: none;
+  line-height: 1.6;
+  font-size: 16px;
+}
+
+.note-rich-content[placeholder]:empty:before {
+  content: attr(placeholder);
+  color: var(--t-muted);
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* Internal Note Links */
+.note-link {
+  color: var(--t-primary);
+  text-decoration: underline;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+/* Link Suggestions Dropdown */
+.link-suggestions {
+  position: absolute;
+  background: var(--t-panel);
+  border: var(--t-border);
+  border-radius: var(--t-radius);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  width: 250px;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 100;
+}
+.link-suggestions.hidden { display: none; }
+
+.suggestion-item {
+  padding: 8px 12px;
+  cursor: pointer;
+  border-bottom: var(--t-border);
+}
+.suggestion-item:last-child { border-bottom: none; }
+.suggestion-item:hover, .suggestion-item.active {
+  background: var(--t-primary);
+  color: white;
+}
+
+/* Right Sidebar - Context */
+.kv-context-panel {
+  width: 250px;
+  min-width: 250px;
+  background: var(--t-panel);
+  border-radius: var(--t-radius);
+  border: var(--t-border);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  overflow-y: auto;
+}
+
+.context-section h3 {
+  font-size: 14px;
+  margin-bottom: 12px;
+  color: var(--t-muted);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.context-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.context-list li {
+  padding: 8px;
+  background: var(--t-bg);
+  border-radius: 4px;
+  margin-bottom: 8px;
+  font-size: 13px;
+  cursor: pointer;
+  border-left: 3px solid var(--t-primary);
+}
+.context-list li:hover { opacity: 0.9; }
+
+.flashcards-preview {
+  background: var(--t-bg);
+  padding: 12px;
+  border-radius: var(--t-radius);
+  font-size: 13px;
+}
+
+/* Tags */
+.tag-cloud {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.tag-pill {
+  background: var(--t-bg);
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  color: var(--t-text);
+  cursor: pointer;
+}
+.tag-pill:hover { background: var(--t-primary); color: white; }
+
+/* AI Modal */
+.ai-actions-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.ai-response-area {
+  background: var(--t-bg);
+  padding: 16px;
+  border-radius: var(--t-radius);
+  white-space: pre-wrap;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 900px) {
+  .knowledge-layout {
+    flex-direction: column;
+    overflow-y: auto;
+    height: auto;
+  }
+  .kv-explorer, .kv-context-panel {
+    width: 100%;
+    min-width: 100%;
+    height: auto;
+    max-height: 300px;
+  }
+  .kv-editor-panel {
+    min-height: 500px;
+  }
+}
