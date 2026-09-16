@@ -315,3 +315,6 @@ html[data-theme="premium"] .dashboard-page .primary-btn {
   color: var(--t-text) !important;
   background: transparent !important;
 }
+
+.theme-selector select option { background-color: #1a1a1a; color: #ffffff; }
+
