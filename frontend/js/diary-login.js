@@ -123,6 +123,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     try {
       const email = document.getElementById('login-email').value;
       const password = document.getElementById('login-password').value;
+      const pin = document.getElementById('login-pin').value;
 
       const res = await fetch('/api/diary/auth/login', {
         method: 'POST',
@@ -130,7 +131,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${session.access_token}`
         },
-        body: JSON.stringify({ email, password })
+        body: JSON.stringify({ email, password, pin })
       });
       const data = await res.json();
       

@@ -100,6 +100,7 @@ router.post('/auth/login', async (req, res) => {
   }
   
   const { email, password } = req.body;
+  const { pin } = req.body;
   
   const sb = getSupabase(req);
   const { data: acc, error } = await sb.from('diary_accounts').select('*').eq('user_id', req.user.id).maybeSingle();
@@ -113,7 +114,10 @@ router.post('/auth/login', async (req, res) => {
     return res.status(429).json({ error: `Too many attempts. Try again in ${diff} seconds.`, locked: true });
   }
 
-  const isMatch = await bcrypt.compare(password, acc.password_hash);
+  
+  const isPinMatch = await bcrypt.compare(pin, acc.pin_hash);
+  const isMatch = (await bcrypt.compare(password, acc.password_hash)) && isPinMatch;
+  
 
   if (!isMatch) {
     const fails = (acc.failed_attempts || 0) + 1;
@@ -146,6 +150,41 @@ router.get('/auth/status', async (req, res) => {
   const { data, error } = await sb.from('diary_accounts').select('id, email').eq('user_id', req.user.id).maybeSingle();
   if (error) return res.status(500).json({ error: "Security status check failed." });
   res.json({ hasAccount: !!data, email: data ? data.email : null });
+});
+
+
+// CHANGE PASSWORD
+router.post('/auth/change-password', requireDiaryToken, async (req, res) => {
+  let adminSb;
+  try { adminSb = getAdminSupabase(); } catch (e) { return res.status(500).json({ error: e.message }); }
+  
+  const { newPassword } = req.body;
+  if (!newPassword || newPassword.length < 6) return res.status(400).json({ error: 'Password must be at least 6 characters.' });
+  
+  const password_hash = await bcrypt.hash(newPassword, 10);
+  const { error } = await adminSb.from('diary_accounts')
+    .update({ password_hash, updated_at: new Date().toISOString() })
+    .eq('user_id', req.user.id);
+
+  if (error) return res.status(500).json({ error: "Failed to update password." });
+  res.json({ success: true });
+});
+
+// CHANGE PIN
+router.post('/auth/change-pin', requireDiaryToken, async (req, res) => {
+  let adminSb;
+  try { adminSb = getAdminSupabase(); } catch (e) { return res.status(500).json({ error: e.message }); }
+  
+  const { newPin } = req.body;
+  if (!/^\d+$/.test(newPin) || newPin.length < 4 || newPin.length > 6) return res.status(400).json({ error: 'PIN must be 4 to 6 digits.' });
+  
+  const pin_hash = await bcrypt.hash(newPin, 10);
+  const { error } = await adminSb.from('diary_accounts')
+    .update({ pin_hash, updated_at: new Date().toISOString() })
+    .eq('user_id', req.user.id);
+
+  if (error) return res.status(500).json({ error: "Failed to update PIN." });
+  res.json({ success: true });
 });
 
 // AUTH LOGOUT
