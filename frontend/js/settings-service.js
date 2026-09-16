@@ -10,7 +10,7 @@ export const defaultSettings = {
   notifications: { push: true, email: true, assignments: true, quizzes: true, study: true, ai: true },
   learning_preferences: { study_goal: 45, reminder_time: '18:00', difficulty: 'balanced', default_mode: 'guided' },
   ai_preferences: {
-    default_provider: 'demo',
+    default_provider: 'gemini',
     default_model: 'guided-tutor',
     temperature: 0.7,
     token_limit: 2048,

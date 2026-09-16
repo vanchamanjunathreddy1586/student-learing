@@ -1,3 +1,13 @@
+
+function escapeHtml(unsafe) {
+  if (!unsafe) return '';
+  return String(unsafe)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
 import { getAccessToken } from './supabase.js';
 
 const headers = () => {
@@ -29,8 +39,8 @@ const loadSubjects = async () => {
       const card = document.createElement('div');
       card.className = 'subject-card';
       card.innerHTML = `
-        <h3 class="subject-title">${sub.name}</h3>
-        <div class="subject-meta"><span>${sub.category}</span> <span>${sub.mastery_percentage}%</span></div>
+        <h3 class="subject-title">${escapeHtml(sub.name)}</h3>
+        <div class="subject-meta"><span>${escapeHtml(sub.category)}</span> <span>${sub.mastery_percentage}%</span></div>
         <div class="progress"><i style="width:${sub.mastery_percentage}%"></i></div>
       `;
       card.onclick = () => openSubject(sub);
@@ -65,7 +75,7 @@ const loadTopics = async (subjectId) => {
       
       item.innerHTML = `
         <div>
-          <strong style="display:block; margin-bottom:5px;">${t.name}</strong>
+          <strong style="display:block; margin-bottom:5px;">${escapeHtml(t.name)}</strong>
           <span class="topic-status ${statusClass}">${t.mastery_status}</span>
         </div>
         <button class="btn-secondary" style="font-size: 11px;" onclick="location.href='/quiz.html?topic=${encodeURIComponent(t.name)}'">Quiz</button>
