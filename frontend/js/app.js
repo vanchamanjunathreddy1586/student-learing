@@ -1,3 +1,33 @@
+// ==========================================
+// GLOBAL THEME MANAGER
+// ==========================================
+(function initTheme() {
+  const savedTheme = localStorage.getItem('sl_theme') || 'system';
+  
+  const applyTheme = (theme) => {
+    if (theme === 'system') {
+      const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      document.documentElement.dataset.theme = isDark ? 'dark' : 'light';
+    } else {
+      document.documentElement.dataset.theme = theme;
+    }
+  };
+  
+  // Listen for OS/System theme changes
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+    if (localStorage.getItem('sl_theme') === 'system') applyTheme('system');
+  });
+
+  // Apply immediately to prevent flashing
+  applyTheme(savedTheme);
+  
+  // Expose globally for settings.js to use
+  window.slSetTheme = (newTheme) => {
+    localStorage.setItem('sl_theme', newTheme);
+    applyTheme(newTheme);
+  };
+})();
+
 import { getAccessToken } from './supabase.js';
 
 const toast = document.querySelector('#toast');
@@ -46,10 +76,10 @@ if (document.querySelector('#ask-form')) {
 
 fetch('/api/ai/providers', { headers: getHeaders() }).then((response) => response.json()).then((data) => { 
   const status = document.querySelector('#provider-status');
-  if (status) status.textContent = `AI GATEWAY · ${data.active.toUpperCase()} ACTIVE`; 
+  if (status) status.textContent = `AI GATEWAY A ${data.active.toUpperCase()} ACTIVE`; 
 }).catch(() => { 
   const status = document.querySelector('#provider-status');
-  if (status) status.textContent = 'AI GATEWAY · OFFLINE'; 
+  if (status) status.textContent = 'AI GATEWAY A OFFLINE'; 
 });
 
 // Chatbot Logic
