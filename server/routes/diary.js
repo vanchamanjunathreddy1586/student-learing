@@ -5,7 +5,7 @@ import bcrypt from 'bcrypt';
 const router = express.Router();
 const supabaseUrl = process.env.SUPABASE_URL || '';
 const supabaseAnonKey = process.env.SUPABASE_PUBLISHABLE_KEY || process.env.SUPABASE_ANON_KEY || '';
-const serviceRoleKey = process.env.SUPABASE_SECRET_KEY || supabaseAnonKey;
+const serviceRoleKey = process.env.SUPABASE_SECRET_KEY;
 
 const getSupabase = (req) => {
   const token = req.get('Authorization')?.replace(/^Bearer\s+/i, '').trim();
@@ -16,15 +16,47 @@ const getSupabase = (req) => {
 };
 
 const getAdminSupabase = () => {
-  if (!supabaseUrl || !serviceRoleKey) return null;
+  if (!supabaseUrl || !serviceRoleKey) {
+    console.error("CRITICAL ERROR: SUPABASE_SECRET_KEY is missing. Admin bypass failed.");
+    throw new Error("Server misconfiguration: missing secret key.");
+  }
   return createClient(supabaseUrl, serviceRoleKey);
 };
 
+import jwt from 'jsonwebtoken';
+
+const DIARY_SECRET = process.env.DIARY_JWT_SECRET || 'fallback-super-secret-diary-key-2026';
+const DIARY_EXPIRATION = '15m';
+
+function signDiaryToken(userId) {
+  return jwt.sign({ userId, diaryUnlocked: true }, DIARY_SECRET, { expiresIn: DIARY_EXPIRATION });
+}
+
+function requireDiaryToken(req, res, next) {
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+  const token = req.headers['x-diary-token'];
+  if (!token) {
+    return res.status(403).json({ error: 'Diary is locked. PIN verification required.' });
+  }
+  try {
+    const decoded = jwt.verify(token, DIARY_SECRET);
+    if (decoded.userId !== req.user.id) {
+      throw new Error('User mismatch');
+    }
+    next();
+  } catch (err) {
+    return res.status(403).json({ error: 'Diary session expired or invalid. Please unlock again.' });
+  }
+}
+
 // PIN SETUP
-router.post('/pin/setup', async (req, res) => {
-  const adminSb = getAdminSupabase();
-  const sb = getSupabase(req);
-  if (!sb || !adminSb) return res.status(401).json({ error: 'Auth required' });
+router.post('/security/setup', async (req, res) => {
+  let adminSb;
+  try {
+    adminSb = getAdminSupabase();
+  } catch (e) {
+    return res.status(500).json({ error: e.message });
+  }
   
   const { pin } = req.body;
   if (!pin || typeof pin !== 'string' || pin.length < 4 || pin.length > 6 || !/^\d+$/.test(pin)) {
@@ -36,7 +68,10 @@ router.post('/pin/setup', async (req, res) => {
     return res.status(400).json({ error: 'Please choose a stronger PIN.' });
   }
 
-  const { data: existing } = await adminSb.from('diary_security').select('id').eq('user_id', req.user.id).maybeSingle();
+  const sb = getSupabase(req);
+  if (!sb) return res.status(401).json({ error: 'Auth required' });
+
+  const { data: existing } = await sb.from('diary_security').select('id').eq('user_id', req.user.id).maybeSingle();
   if (existing) {
     return res.status(400).json({ error: 'PIN is already set up.' });
   }
@@ -49,16 +84,21 @@ router.post('/pin/setup', async (req, res) => {
     }]);
     
     if (error) throw error;
-    res.json({ success: true });
+    const token = signDiaryToken(req.user.id);
+    res.json({ success: true, diaryToken: token });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-// PIN VERIFY
-router.post('/pin/verify', async (req, res) => {
-  const adminSb = getAdminSupabase();
-  if (!adminSb) return res.status(500).json({ error: 'Server misconfiguration' });
+// PIN LOGIN
+router.post('/security/login', async (req, res) => {
+  let adminSb;
+  try {
+    adminSb = getAdminSupabase();
+  } catch (e) {
+    return res.status(500).json({ error: e.message });
+  }
   
   const { pin } = req.body;
   
@@ -67,6 +107,11 @@ router.post('/pin/verify', async (req, res) => {
   const sb = getSupabase(req);
   
   const { data: securityRow, error } = await sb.from('diary_security').select('*').eq('user_id', req.user.id).maybeSingle();
+  
+  if (error) {
+    console.error("Diary security fetch error:", error);
+    return res.status(500).json({ error: "Failed to verify security status." });
+  }
   
   if (!securityRow) {
     return res.status(404).json({ error: 'No PIN setup found.' });
@@ -102,18 +147,25 @@ router.post('/pin/verify', async (req, res) => {
     last_unlocked_at: new Date().toISOString()
   }).eq('user_id', req.user.id);
 
-  res.json({ success: true });
+  const token = signDiaryToken(req.user.id);
+  res.json({ success: true, diaryToken: token });
 });
 
 // PIN CHANGE
-router.post('/pin/change', async (req, res) => {
-  const adminSb = getAdminSupabase();
+router.post('/security/change-pin', async (req, res) => {
+  let adminSb;
+  try {
+    adminSb = getAdminSupabase();
+  } catch (e) {
+    return res.status(500).json({ error: e.message });
+  }
   const sb = getSupabase(req);
   if (!sb || !adminSb) return res.status(401).json({ error: 'Auth required' });
   
   const { currentPin, newPin } = req.body;
   
-  const { data: securityRow } = await sb.from('diary_security').select('*').eq('user_id', req.user.id).maybeSingle();
+  const { data: securityRow, error } = await sb.from('diary_security').select('*').eq('user_id', req.user.id).maybeSingle();
+  if (error) return res.status(500).json({ error: "Failed to verify security status." });
   if (!securityRow) return res.status(404).json({ error: 'No PIN setup found.' });
   
   if (securityRow.locked_until && new Date(securityRow.locked_until) > new Date()) {
@@ -135,18 +187,67 @@ router.post('/pin/change', async (req, res) => {
   res.json({ success: true });
 });
 
+// PIN RESET (Forgot PIN)
+router.post('/security/reset', async (req, res) => {
+  let adminSb;
+  try {
+    adminSb = getAdminSupabase();
+  } catch (e) {
+    return res.status(500).json({ error: e.message });
+  }
+  
+  // This endpoint requires standard Supabase authentication (which is handled globally).
+  // The user just provides a new PIN. This essentially acts as a "hard reset" 
+  // since they are logged into the Supabase account.
+  const { newPin } = req.body;
+  
+  if (!newPin || typeof newPin !== 'string' || newPin.length < 4 || newPin.length > 6 || !/^\d+$/.test(newPin)) {
+    return res.status(400).json({ error: 'New PIN must be 4 to 6 digits.' });
+  }
+
+  const pin_hash = await bcrypt.hash(newPin, 10);
+  const { data, error } = await adminSb.from('diary_security')
+    .update({ 
+      pin_hash,
+      failed_attempts: 0,
+      locked_until: null,
+      last_unlocked_at: new Date().toISOString()
+    })
+    .eq('user_id', req.user.id)
+    .select();
+
+  if (error) return res.status(500).json({ error: "Failed to reset PIN." });
+  if (!data || data.length === 0) {
+    return res.status(404).json({ error: 'No PIN setup found.' });
+  }
+
+  const token = signDiaryToken(req.user.id);
+  res.json({ success: true, diaryToken: token });
+});
+
 // CHECK PIN STATUS (for UI)
-router.get('/pin/status', async (req, res) => {
+router.get('/security/status', async (req, res) => {
   const sb = getSupabase(req);
   if (!sb) return res.status(401).json({ error: 'Auth required' });
   
-  const { data } = await sb.from('diary_security').select('id').eq('user_id', req.user.id).maybeSingle();
+  const { data, error } = await sb.from('diary_security').select('id').eq('user_id', req.user.id).maybeSingle();
+  if (error) {
+    console.error("Diary security fetch error:", error);
+    return res.status(500).json({ error: "Security status check failed." });
+  }
   res.json({ hasPin: !!data });
+});
+
+// LOGOUT (Clear server-side session concepts if any)
+router.post('/security/logout', async (req, res) => {
+  // Since we use stateless JWT, we can't inherently destroy it on the server 
+  // without a blacklist, but the client will drop it. We just return success.
+  res.json({ success: true });
 });
 
 
 // GET all diaries (with optional search and date filters)
-router.get('/', async (req, res) => {
+router.get('/', requireDiaryToken, async (req, res) => {
   const sb = getSupabase(req);
   if (!sb) return res.status(401).json({ error: 'Auth required' });
   
@@ -171,7 +272,7 @@ router.get('/', async (req, res) => {
 });
 
 // GET insights/stats
-router.get('/insights', async (req, res) => {
+router.get('/insights', requireDiaryToken, async (req, res) => {
   const sb = getSupabase(req);
   if (!sb) return res.status(401).json({ error: 'Auth required' });
   
@@ -189,7 +290,7 @@ router.get('/insights', async (req, res) => {
 });
 
 // GET calendar markers (lightweight fetch just for dates)
-router.get('/calendar', async (req, res) => {
+router.get('/calendar', requireDiaryToken, async (req, res) => {
   const sb = getSupabase(req);
   if (!sb) return res.status(401).json({ error: 'Auth required' });
   
@@ -199,7 +300,7 @@ router.get('/calendar', async (req, res) => {
 });
 
 // GET single diary
-router.get('/:id', async (req, res) => {
+router.get('/:id', requireDiaryToken, async (req, res) => {
   const sb = getSupabase(req);
   if (!sb) return res.status(401).json({ error: 'Auth required' });
   
@@ -209,7 +310,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // POST new diary
-router.post('/', async (req, res) => {
+router.post('/', requireDiaryToken, async (req, res) => {
   const sb = getSupabase(req);
   if (!sb) return res.status(401).json({ error: 'Auth required' });
   
@@ -229,7 +330,7 @@ router.post('/', async (req, res) => {
 });
 
 // PATCH (update) existing diary (auto-save)
-router.patch('/:id', async (req, res) => {
+router.patch('/:id', requireDiaryToken, async (req, res) => {
   const sb = getSupabase(req);
   if (!sb) return res.status(401).json({ error: 'Auth required' });
   
@@ -247,7 +348,7 @@ router.patch('/:id', async (req, res) => {
 });
 
 // DELETE diary
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', requireDiaryToken, async (req, res) => {
   const sb = getSupabase(req);
   if (!sb) return res.status(401).json({ error: 'Auth required' });
   

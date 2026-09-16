@@ -25,10 +25,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     return;
   }
 
-  const getHeaders = async () => ({
-    'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
-    'Content-Type': 'application/json'
-  });
+  let diaryToken = null;
+
+  const getHeaders = async () => {
+    const headers = {
+      'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
+      'Content-Type': 'application/json'
+    };
+    if (diaryToken) {
+      headers['X-Diary-Token'] = diaryToken;
+    }
+    return headers;
+  };
 
   // --- Elements ---
   const saveStatus = document.getElementById('save-status');
@@ -122,25 +130,38 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   async function checkLock() {
     try {
-      const res = await fetch('/api/diary/pin/status', { headers: await getHeaders() });
+      const res = await fetch('/api/diary/security/status', { headers: await getHeaders() });
       if (!res.ok) throw new Error('Failed to fetch PIN status');
       const { hasPin } = await res.json();
       
       if (!hasPin) {
         pinMode = 'setup';
-        showLockScreen('🔐 Secure Your Personal Diary', 'Create a private 4-6 digit PIN to protect your diary.', false);
+        showLockScreen('Secure Your Diary', 'Create a private 4-6 digit PIN to protect your diary.', false);
       } else {
         lockDiary();
       }
     } catch (err) {
       console.error('Lock check failed:', err);
-      showToast('Security check failed', 'error');
+      showToast('Diary security could not be verified. Please try again.', 'error');
+      // DO NOT call lockDiary() or initDiary() here. We intentionally block if it fails.
     }
   }
 
   function lockDiary() {
+    if (diaryToken) {
+      // Best effort logout on server
+      fetch('/api/diary/security/logout', { method: 'POST', headers: { 'X-Diary-Token': diaryToken } }).catch(() => {});
+    }
+    diaryToken = null;
     pinMode = 'verify';
-    showLockScreen('🔐 Personal Diary Locked', 'Enter your PIN to continue', false);
+    
+    // Clear DOM strictly for security
+    const diaryContent = document.getElementById('diary-content');
+    const recentEntries = document.getElementById('recent-entries');
+    if (diaryContent) diaryContent.innerHTML = '';
+    if (recentEntries) recentEntries.innerHTML = '';
+
+    showLockScreen('Personal Diary Locked', 'Enter your PIN to continue', false);
     if(diaryLayout) diaryLayout.style.opacity = '0';
     if(diaryLayout) diaryLayout.style.pointerEvents = 'none';
     if(lockDiaryBtn) lockDiaryBtn.style.display = 'none';
@@ -152,7 +173,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if(lockSubtitle) lockSubtitle.textContent = subtitle;
     if(cancelPinBtn) cancelPinBtn.style.display = canCancel ? 'block' : 'none';
     if(forgotPinBtn) forgotPinBtn.style.display = pinMode === 'verify' ? 'block' : 'none';
-    if(unlockBtn) unlockBtn.textContent = pinMode === 'verify' ? 'Unlock' : (pinMode === 'setup' ? 'Create PIN' : 'Continue');
+    if(unlockBtn) unlockBtn.textContent = pinMode === 'verify' ? 'Unlock Diary' : (pinMode === 'setup' || pinMode === 'reset' ? 'Create Diary PIN' : 'Continue');
     if(pinErrorMsg) pinErrorMsg.textContent = '';
     clearPins();
     resetInactivityTimer();
@@ -168,16 +189,48 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   if(forgotPinBtn) {
     forgotPinBtn.addEventListener('click', () => {
-      alert('Account recovery is required to reset your PIN. Please contact support or go to Account Settings.');
+      if (confirm('Resetting your PIN requires re-verifying your account. Are you sure you want to reset your Diary PIN?')) {
+        pinMode = 'reset';
+        showLockScreen('🔄 Reset PIN', 'Create a new Diary PIN.', true);
+      }
     });
   }
+
+  // Mobile Keypad handlers
+  const keys = document.querySelectorAll('.vault-key');
+  keys.forEach(key => {
+    key.addEventListener('click', () => {
+      const val = key.dataset.val;
+      if (val === 'clear') {
+        clearPins();
+      } else if (val === 'back') {
+        for (let i = pinInputs.length - 1; i >= 0; i--) {
+          if (pinInputs[i].value !== '') {
+            pinInputs[i].value = '';
+            pinInputs[i].focus();
+            break;
+          }
+        }
+      } else {
+        // Find first empty
+        for (let i = 0; i < pinInputs.length; i++) {
+          if (pinInputs[i].value === '') {
+            pinInputs[i].value = val;
+            if (i < pinInputs.length - 1) pinInputs[i + 1].focus();
+            if (i === pinInputs.length - 1) unlockBtn.click();
+            break;
+          }
+        }
+      }
+    });
+  });
 
   if (lockDiaryBtn) lockDiaryBtn.addEventListener('click', () => lockDiary());
 
   if (changePinBtn) {
     changePinBtn.addEventListener('click', () => {
       pinMode = 'change_old';
-      showLockScreen('🔑 Change PIN', 'Enter your CURRENT PIN', true);
+      showLockScreen('Change PIN', 'Enter your CURRENT PIN', true);
     });
   }
 
@@ -195,7 +248,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   
       try {
         if (pinMode === 'setup') {
-          const res = await fetch('/api/diary/pin/setup', {
+          const res = await fetch('/api/diary/security/setup', {
             method: 'POST',
             headers: await getHeaders(),
             body: JSON.stringify({ pin })
@@ -203,12 +256,13 @@ document.addEventListener('DOMContentLoaded', async () => {
           const data = await res.json();
           if (!res.ok) throw new Error(data.error || 'Failed to setup PIN');
           
+          diaryToken = data.diaryToken;
           showToast('PIN securely created!', 'success');
           unlockDiary();
           initDiary();
         } 
         else if (pinMode === 'verify') {
-          const res = await fetch('/api/diary/pin/verify', {
+          const res = await fetch('/api/diary/security/login', {
             method: 'POST',
             headers: await getHeaders(),
             body: JSON.stringify({ pin })
@@ -216,22 +270,23 @@ document.addEventListener('DOMContentLoaded', async () => {
           const data = await res.json();
           if (!res.ok) throw new Error(data.error || 'Incorrect PIN');
           
+          diaryToken = data.diaryToken;
           unlockDiary();
           initDiary();
         }
         else if (pinMode === 'change_old') {
-          const res = await fetch('/api/diary/pin/verify', {
+          const res = await fetch('/api/diary/security/login', {
             method: 'POST',
             headers: await getHeaders(),
             body: JSON.stringify({ pin })
           });
-          if (!res.ok) {
-            const data = await res.json();
-            throw new Error(data.error || 'Incorrect current PIN');
-          }
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || 'Incorrect current PIN');
+          
+          diaryToken = data.diaryToken;
           window._tempOldPin = pin;
           pinMode = 'change_new';
-          showLockScreen('🔑 New PIN', 'Enter your NEW 4-6 digit PIN', true);
+          showLockScreen('New PIN', 'Enter your NEW 4-6 digit PIN', true);
         }
         else if (pinMode === 'change_new') {
           const invalidPins = ['0000', '000000', '1111', '111111', '1234', '123456'];
@@ -239,15 +294,15 @@ document.addEventListener('DOMContentLoaded', async () => {
           
           tempNewPin = pin;
           pinMode = 'change_confirm';
-          showLockScreen('🔑 Confirm PIN', 'Re-enter your NEW PIN', true);
+          showLockScreen('Confirm PIN', 'Re-enter your NEW PIN', true);
         }
         else if (pinMode === 'change_confirm') {
           if (pin !== tempNewPin) {
             pinMode = 'change_new';
-            showLockScreen('🔑 New PIN', 'PINs did not match. Enter NEW PIN again', true);
+            showLockScreen('New PIN', 'PINs did not match. Enter NEW PIN again', true);
             throw new Error('PINs do not match.');
           }
-          const res = await fetch('/api/diary/pin/change', {
+          const res = await fetch('/api/diary/security/change-pin', {
             method: 'POST',
             headers: await getHeaders(),
             body: JSON.stringify({ currentPin: window._tempOldPin, newPin: pin })
@@ -260,12 +315,26 @@ document.addEventListener('DOMContentLoaded', async () => {
           showToast('PIN successfully changed!', 'success');
           unlockDiary();
         }
+        else if (pinMode === 'reset') {
+          const res = await fetch('/api/diary/security/reset', {
+            method: 'POST',
+            headers: await getHeaders(),
+            body: JSON.stringify({ newPin: pin })
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || 'Failed to reset PIN');
+          
+          diaryToken = data.diaryToken;
+          showToast('PIN securely reset!', 'success');
+          unlockDiary();
+          initDiary();
+        }
       } catch (err) {
         pinErrorMsg.textContent = err.message;
         clearPins();
       } finally {
         unlockBtn.disabled = false;
-        unlockBtn.textContent = pinMode === 'verify' ? 'Unlock' : (pinMode === 'setup' ? 'Create PIN' : 'Continue');
+        unlockBtn.textContent = pinMode === 'verify' ? 'Unlock Diary' : (pinMode === 'setup' || pinMode === 'reset' ? 'Create Diary PIN' : 'Continue');
       }
     });
   }
