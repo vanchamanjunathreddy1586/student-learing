@@ -3,7 +3,4 @@
 -- If the authenticated user does not have EXECUTE permission on this function, the UPSERT fails.
 
 GRANT EXECUTE ON FUNCTION public.is_staff() TO authenticated;
-GRANT EXECUTE ON FUNCTION public.is_staff() TO anon;
-
 GRANT EXECUTE ON FUNCTION public.is_diary_owner(uuid) TO authenticated;
-GRANT EXECUTE ON FUNCTION public.is_diary_owner(uuid) TO anon;
