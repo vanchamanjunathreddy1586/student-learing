@@ -53,12 +53,12 @@
       <section class="welcome reveal"><div><p class="eyebrow" id="today-label">Your Learning Space</p><h1 id="greeting">Good Morning, Student <span>👋</span></h1><p class="muted">Welcome back to your learning space!</p></div><button class="primary-btn" id="focus-btn">+ Start a focus session</button></section>
       
       <section class="stats-grid reveal"><article class="stat-card accent"><div class="stat-icon">◒</div><div><small>Weekly focus</small><strong>4h 48m</strong><span class="trend">↑ 18% <small>vs last week</small></span></div><div class="mini-bars"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></article><article class="stat-card"><div class="stat-icon green">♧</div><div><small>Current streak</small><strong>7 days</strong><span class="trend">Personal best</span></div><div class="streak-days"><b>M</b><b>T</b><b>W</b><b>T</b><b>F</b><b>S</b><b>S</b></div></article><article class="stat-card"><div class="stat-icon blue">⌁</div><div><small>Course mastery</small><strong>68%</strong><span class="trend blue-text">↑ 6% this month</span></div><div class="ring"><span>68</span></div></article></section>
-      <section class="content-grid reveal"><div class="left-column"><div class="section-heading"><div><p class="eyebrow">Continue Learning</p><h2>Pick up where you left off</h2></div><a href="/notes.html">View library <span>→</span></a></div><article class="continue-card" id="continue-card-wrapper">
+      <section class="content-grid reveal"><div class="left-column"><div class="section-heading"><div><p class="eyebrow">Continue Learning</p><h2>Pick up where you left off</h2></div><a href="/notes.html">View library <span>→</span></a></div><article class="continue-card" id="continue-card-wrapper" onclick="window.location.href='/lessons.html'" style="cursor: pointer;">
   <div class="course-art" style="background: var(--bg-card);"><i class="fas fa-book-open" style="font-size: 32px; color: var(--accent);"></i></div>
   <div class="course-info">
     <h3>Start Learning</h3>
     <p>Upload a document or pick up where you left off.</p>
-    <a href="/lessons.html" class="primary-btn" id="resume-btn" style="width: 100%; margin-top: 16px; text-align:center; text-decoration:none; display:inline-block; box-sizing:border-box;">Start Learning <span>✨</span></a>
+    <button class="primary-btn" id="resume-btn" style="width: 100%; margin-top: 16px;" onclick="window.location.href='/lessons.html'; event.stopPropagation();">Start Learning <span>→</span></button>
   </div>
 </article><div class="section-heading compact"><div><p class="eyebrow">Up Next</p><h2>Today's learning path</h2></div></div><div class="path-list"><div class="path-item"><span class="path-marker">!</span><div><strong>No tasks today</strong><small>Start a focus session or generate a quiz.</small></div></div></div></div><aside class="right-column">
 <div class="profile-card reveal" id="profile-card"><div class="profile-orbit"></div>
