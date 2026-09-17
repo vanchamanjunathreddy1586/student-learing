@@ -156,7 +156,7 @@ const sendMessage = async (presetText = null) => {
   scrollToBottom();
   
   try {
-    const res = await fetch('/api/ai/chat', {
+    const res = await fetch('/api/ai/teacher', {
       method: 'POST',
       headers: headers(),
       body: JSON.stringify({ prompt: text, task: 'tutor' })

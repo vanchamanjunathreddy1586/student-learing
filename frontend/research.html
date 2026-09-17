@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head><script src="/js/theme-manager.js"></script>
+    
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
+  <title>Student Learning | Research Assistant</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/app.css">
+  <link rel="stylesheet" href="/css/dashboard.css">
+  <link rel="stylesheet" href="/css/themes.css">
+  <link rel="stylesheet" href="/css/toast.css">
+  <style>
+    .search-bar { display: flex; gap: 10px; margin-bottom: 30px; }
+    .search-input { flex: 1; padding: 15px 20px; border-radius: 8px; border: 1px solid var(--dash-line); background: var(--dash-panel); color: var(--dash-text); font-size: 16px; }
+    .research-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+    .paper-card { background: var(--dash-panel); border: 1px solid var(--dash-line); border-radius: 12px; padding: 20px; display: flex; flex-direction: column; }
+    .paper-card h3 { font-family: 'Space Grotesk', sans-serif; margin: 0 0 10px; font-size: 18px; }
+    .paper-meta { font-size: 12px; color: var(--dash-muted); margin-bottom: 15px; font-weight: 500; }
+    .paper-actions { margin-top: auto; display: flex; gap: 10px; }
+    .paper-card p { font-size: 13px; color: var(--dash-muted); margin-bottom: 15px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+  </style>
+</head>
+<body class="dashboard-page">
+  <div class="app-shell" id="dashboard-shell">
+    <div class="sidebar-overlay"></div>
+    <aside class="sidebar">
+      <div class="brand"><span class="brand-mark">?</span><span>smart<br><b>learning</b></span></div>
+      <a class="profile-mini profile-link" href="/settings.html#account" aria-label="Open profile and settings"><div class="avatar" data-profile-initials>SL</div><div><strong data-profile-name>Student</strong><small>Profile &amp; settings</small></div><span class="status-dot"></span></a>
+      <nav aria-label="Main navigation">
+          <p class="nav-label">Workspace</p>
+          <a class="nav-item" href="/"><span>??</span> Overview</a>
+          <a class="nav-item" href="/ai-teacher.html"><span>??</span> AI Teacher</a>
+          <a class="nav-item" href="/scan-learn.html"><span>??</span> Scan & Learn</a>
+          <a class="nav-item" href="/study-planner.html"><span>??</span> Study planner</a>
+          
+          <p class="nav-label">Learn</p>
+          <a class="nav-item" href="/classroom.html"><span>??</span> Subjects</a>
+          <a class="nav-item" href="/quiz.html"><span>??</span> Quizzes</a>
+          <a class="nav-item" href="/groups.html"><span>??</span> Study Groups</a>
+          <a class="nav-item" href="/analytics.html"><span>??</span> Analytics & Gamification</a>
+          
+          <p class="nav-label">Tools</p>
+          <a class="nav-item active" href="/research.html"><span>??</span> Research Assistant</a>
+          <a class="nav-item" href="/resources.html"><span>??</span> Resource Library</a>
+          <a class="nav-item" href="/coding.html"><span>??</span> Coding Lab</a>
+          
+          <p class="nav-label">Personal</p>
+          <a class="nav-item" href="/diary.html"><span>??</span> Student Diary</a>
+      </nav>
+    </aside>
+
+    <main class="main-content">
+      <header class="topbar">
+        <button class="mobile-menu" aria-label="Open menu">?</button>
+        <div class="breadcrumbs">Tools <span>/</span> Research Assistant</div>
+        <div class="top-actions">
+        <a class="avatar small profile-avatar-link" href="/settings.html#account" data-profile-initials>SL</a></div>
+      </header>
+
+      <section class="welcome reveal">
+        <div>
+          <p class="eyebrow">ACADEMIC KNOWLEDGE</p>
+          <h1>Research Assistant</h1>
+          <p class="muted">Search millions of scholarly articles and preprints from OpenAlex and arXiv.</p>
+        </div>
+      </section>
+
+      <section class="reveal">
+        <form id="search-form" class="search-bar">
+          <input type="text" id="search-query" class="search-input" placeholder="Search for AI malware detection, quantum physics, etc..." required>
+          <button type="submit" class="primary-btn">Search</button>
+        </form>
+
+        <div id="loading" style="display:none;text-align:center;padding:40px;color:var(--dash-muted);">Searching...</div>
+        
+        <div id="results" class="research-grid"></div>
+      </section>
+    </main>
+  </div>
+
+  <div id="toast-container"></div>
+  <script type="module" src="/js/supabase.js"></script>
+  <script type="module" src="/js/app.js"></script>
+  <script type="module" src="/js/research.js"></script>
+</body>
+</html>

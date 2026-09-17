@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head><script src="/js/theme-manager.js"></script>
+    
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
+  <title>Student Learning | Coding Lab</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/app.css">
+  <link rel="stylesheet" href="/css/dashboard.css">
+  <link rel="stylesheet" href="/css/themes.css">
+  <link rel="stylesheet" href="/css/toast.css">
+  <style>
+    .editor-container { display: flex; flex-direction: column; gap: 15px; margin-top: 20px; }
+    .editor-header { display: flex; justify-content: space-between; align-items: center; }
+    .language-select { background: var(--dash-panel); color: var(--dash-text); border: 1px solid var(--dash-line); padding: 8px 12px; border-radius: 6px; font-family: inherit; font-size: 14px; outline: none; }
+    .code-editor { background: #1e1e1e; color: #d4d4d4; border-radius: 8px; border: 1px solid var(--dash-line); padding: 15px; font-family: monospace; font-size: 14px; line-height: 1.5; min-height: 300px; width: 100%; box-sizing: border-box; resize: vertical; outline: none; }
+    .stdin-input { background: var(--dash-panel); color: var(--dash-text); border-radius: 8px; border: 1px solid var(--dash-line); padding: 15px; font-family: monospace; font-size: 14px; min-height: 80px; width: 100%; box-sizing: border-box; resize: vertical; outline: none; margin-top: 10px; }
+    .output-container { background: #000; color: #0f0; border-radius: 8px; padding: 15px; font-family: monospace; font-size: 14px; line-height: 1.5; min-height: 150px; white-space: pre-wrap; overflow-x: auto; margin-top: 20px; border: 1px solid #333; }
+    .error-output { color: #f55; }
+    .status-text { margin-top: 10px; font-size: 13px; color: var(--dash-muted); }
+  </style>
+</head>
+<body class="dashboard-page">
+  <div class="app-shell" id="dashboard-shell">
+    <div class="sidebar-overlay"></div>
+    <aside class="sidebar">
+      <div class="brand"><span class="brand-mark">?</span><span>smart<br><b>learning</b></span></div>
+      <a class="profile-mini profile-link" href="/settings.html#account" aria-label="Open profile and settings"><div class="avatar" data-profile-initials>SL</div><div><strong data-profile-name>Student</strong><small>Profile &amp; settings</small></div><span class="status-dot"></span></a>
+      <nav aria-label="Main navigation">
+          <p class="nav-label">Workspace</p>
+          <a class="nav-item" href="/"><span>??</span> Overview</a>
+          <a class="nav-item" href="/ai-teacher.html"><span>??</span> AI Teacher</a>
+          <a class="nav-item" href="/scan-learn.html"><span>??</span> Scan & Learn</a>
+          <a class="nav-item" href="/study-planner.html"><span>??</span> Study planner</a>
+          
+          <p class="nav-label">Learn</p>
+          <a class="nav-item" href="/classroom.html"><span>??</span> Subjects</a>
+          <a class="nav-item" href="/quiz.html"><span>??</span> Quizzes</a>
+          <a class="nav-item" href="/groups.html"><span>??</span> Study Groups</a>
+          <a class="nav-item" href="/analytics.html"><span>??</span> Analytics & Gamification</a>
+          
+          <p class="nav-label">Tools</p>
+          <a class="nav-item" href="/research.html"><span>??</span> Research Assistant</a>
+          <a class="nav-item" href="/resources.html"><span>??</span> Resource Library</a>
+          <a class="nav-item active" href="/coding.html"><span>??</span> Coding Lab</a>
+          
+          <p class="nav-label">Personal</p>
+          <a class="nav-item" href="/diary.html"><span>??</span> Student Diary</a>
+      </nav>
+    </aside>
+
+    <main class="main-content">
+      <header class="topbar">
+        <button class="mobile-menu" aria-label="Open menu">?</button>
+        <div class="breadcrumbs">Tools <span>/</span> Coding Lab</div>
+        <div class="top-actions">
+        <a class="avatar small profile-avatar-link" href="/settings.html#account" data-profile-initials>SL</a></div>
+      </header>
+
+      <section class="welcome reveal">
+        <div>
+          <p class="eyebrow">PROGRAMMING PRACTICE</p>
+          <h1>Coding Lab</h1>
+          <p class="muted">Write, compile, and execute code in various languages directly in your browser.</p>
+        </div>
+      </section>
+
+      <section class="reveal">
+        <div class="editor-container">
+          <div class="editor-header">
+            <select id="language-select" class="language-select">
+              <option value="71">Python (3.8.1)</option>
+              <option value="50">C (GCC 9.2.0)</option>
+              <option value="54">C++ (GCC 9.2.0)</option>
+              <option value="62">Java (OpenJDK 13.0.1)</option>
+              <option value="63">JavaScript (Node.js 12.14.0)</option>
+            </select>
+            <button id="run-btn" class="primary-btn">? Run Code</button>
+          </div>
+          
+          <textarea id="code-editor" class="code-editor" spellcheck="false" placeholder="Write your code here...">print("Hello, Student Learning!")</textarea>
+          
+          <div>
+            <label style="font-size: 13px; color: var(--dash-muted); font-family: 'Space Grotesk', sans-serif;">Standard Input (Optional)</label>
+            <textarea id="stdin-input" class="stdin-input" spellcheck="false" placeholder="Provide any stdin inputs here..."></textarea>
+          </div>
+          
+          <div id="output-container" class="output-container" style="display: none;"></div>
+          <div id="status-text" class="status-text"></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div id="toast-container"></div>
+  <script type="module" src="/js/supabase.js"></script>
+  <script type="module" src="/js/app.js"></script>
+  <script type="module" src="/js/coding.js"></script>
+</body>
+</html>

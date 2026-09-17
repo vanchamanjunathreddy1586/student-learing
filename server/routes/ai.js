@@ -2,6 +2,7 @@ import express from 'express';
 import { createClient } from '@supabase/supabase-js';
 import { callAI } from '../services/ai-service.js';
 import { getAvailableProviders, getProviderMetadata } from '../provider-registry.js';
+import { routeIntent, fetchToolData } from '../services/intent-router.js';
 
 const router = express.Router();
 
@@ -106,6 +107,60 @@ router.post('/quiz', async (req, res) => {
   } catch(error) {
     console.error("AI Provider Quiz Error:", error);
     res.status(503).json({ error: 'AI_UNAVAILABLE', message: 'Quiz generation is temporarily unavailable.' });
+  }
+});
+
+router.post('/teacher', async (req, res) => {
+  try {
+    const defaultProvider = getActiveProviderId();
+    if (!defaultProvider) throw new Error("AI Configuration Missing");
+    
+    const { prompt, context, provider = defaultProvider } = req.body;
+    if (!prompt || typeof prompt !== 'string') return res.status(400).json({ error: 'Invalid prompt' });
+    
+    const intent = await routeIntent(prompt, provider);
+    const toolData = await fetchToolData(intent, prompt);
+    
+    let enrichedPrompt = prompt;
+    if (toolData) {
+      enrichedPrompt = `Student Question: ${prompt}\n\nTool Context (${intent}): ${toolData}\n\nUse the Tool Context to help answer the question if relevant, but answer as a teacher directly to the student without mentioning the tool.`;
+    }
+    
+    const result = await callAI(enrichedPrompt, 'teacher', context, provider, false);
+    res.json({ ...result, meta: { intent, tool_used: !!toolData } });
+  } catch (error) {
+    console.error("AI Teacher Error:", error);
+    res.status(503).json({ error: 'AI_UNAVAILABLE', message: 'AI Teacher is temporarily unavailable.' });
+  }
+});
+
+router.post('/explain', async (req, res) => {
+  try {
+    const defaultProvider = getActiveProviderId();
+    if (!defaultProvider) throw new Error("AI Configuration Missing");
+    
+    const { text, provider = defaultProvider } = req.body;
+    if (!text || typeof text !== 'string') return res.status(400).json({ error: 'Invalid text' });
+    
+    const result = await callAI(`Explain this simply to a student: ${text}`, 'explain', {}, provider, false);
+    res.json(result);
+  } catch (error) {
+    res.status(503).json({ error: 'AI_UNAVAILABLE', message: 'AI is temporarily unavailable.' });
+  }
+});
+
+router.post('/summarize', async (req, res) => {
+  try {
+    const defaultProvider = getActiveProviderId();
+    if (!defaultProvider) throw new Error("AI Configuration Missing");
+    
+    const { text, provider = defaultProvider } = req.body;
+    if (!text || typeof text !== 'string') return res.status(400).json({ error: 'Invalid text' });
+    
+    const result = await callAI(`Summarize the following content in bullet points: ${text}`, 'summarize', {}, provider, false);
+    res.json(result);
+  } catch (error) {
+    res.status(503).json({ error: 'AI_UNAVAILABLE', message: 'AI is temporarily unavailable.' });
   }
 });
 
