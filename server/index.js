@@ -16,6 +16,7 @@ import learningRouter from './routes/learning.js';
 import researchRouter from './routes/research.js';
 import mathRouter from './routes/math.js';
 import codeRouter from './routes/code.js';
+import lessonsRouter from './routes/lessons.js';
 
 const root = process.cwd();
 const app = express();
@@ -82,6 +83,7 @@ app.use('/api/learning', authenticate, learningRouter);
 app.use('/api/learning/math', authenticate, mathRouter);
 app.use('/api/research', authenticate, researchRouter);
 app.use('/api/code', authenticate, codeRouter);
+app.use('/api/lessons', authenticate, lessonsRouter);
 
 // Removed the sendFile fallback because Vercel vercel.json handles frontend routing natively
 // and Lambda file systems do not always include static files.

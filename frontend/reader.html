@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Reader - Student Learning</title>
+    <script src="/js/theme-manager.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/app.css">
+    <link rel="stylesheet" href="/css/themes.css">
+    <link rel="stylesheet" href="/css/toast.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script>pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';</script>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        background: var(--bg-primary);
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+        overflow: hidden;
+      }
+      .reader-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 24px;
+        background: var(--bg-card);
+        border-bottom: 1px solid var(--border-color);
+        z-index: 10;
+      }
+      .reader-header h1 {
+        margin: 0;
+        font-size: 16px;
+        font-weight: 600;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 300px;
+      }
+      .reader-actions {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+      }
+      .reader-btn {
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        color: var(--text-primary);
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: 0.2s;
+      }
+      .reader-btn:hover {
+        background: var(--accent);
+        color: #000;
+        border-color: var(--accent);
+      }
+      .reader-btn.primary {
+        background: var(--accent);
+        color: #000;
+        border: none;
+        width: auto;
+        padding: 0 16px;
+        font-weight: 600;
+      }
+      .reader-main {
+        flex: 1;
+        overflow: auto;
+        position: relative;
+        background: var(--bg-secondary);
+        display: flex;
+        justify-content: center;
+        padding: 24px;
+      }
+      #pdf-canvas {
+        background: white;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        max-width: 100%;
+        height: auto;
+      }
+      .reader-footer {
+        background: var(--bg-card);
+        border-top: 1px solid var(--border-color);
+        padding: 12px 24px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .page-controls {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+      }
+      .page-controls button {
+        background: transparent;
+        border: none;
+        color: var(--text-primary);
+        font-size: 18px;
+        cursor: pointer;
+      }
+      .page-controls button:disabled {
+        color: var(--dash-muted);
+        cursor: not-allowed;
+      }
+      .progress-container {
+        flex: 1;
+        margin: 0 32px;
+        height: 4px;
+        background: var(--border-color);
+        border-radius: 2px;
+        position: relative;
+      }
+      .progress-fill {
+        position: absolute;
+        left: 0;
+        top: 0;
+        height: 100%;
+        background: var(--accent);
+        width: 0%;
+        transition: width 0.3s;
+      }
+      .sync-status {
+        font-size: 12px;
+        color: var(--text-secondary);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      #ai-panel {
+        position: fixed;
+        right: -400px;
+        top: 61px;
+        bottom: 61px;
+        width: 400px;
+        background: var(--bg-card);
+        border-left: 1px solid var(--border-color);
+        box-shadow: -4px 0 24px rgba(0,0,0,0.1);
+        transition: right 0.3s;
+        z-index: 20;
+        display: flex;
+        flex-direction: column;
+      }
+      #ai-panel.open {
+        right: 0;
+      }
+      .ai-header {
+        padding: 16px;
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .ai-messages {
+        flex: 1;
+        padding: 16px;
+        overflow-y: auto;
+      }
+      .ai-input {
+        padding: 16px;
+        border-top: 1px solid var(--border-color);
+        display: flex;
+        gap: 8px;
+      }
+      .ai-input input {
+        flex: 1;
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        color: var(--text-primary);
+        padding: 10px 16px;
+        border-radius: 24px;
+        outline: none;
+      }
+      @media (max-width: 768px) {
+        #ai-panel {
+          width: 100%;
+          right: -100%;
+        }
+        .reader-header h1 {
+          display: none;
+        }
+        .reader-main {
+          padding: 8px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="reader-header">
+      <a href="/lessons.html" class="reader-btn" aria-label="Back"><i class="fas fa-arrow-left"></i></a>
+      <h1 id="doc-title">Loading...</h1>
+      <div class="reader-actions">
+        <button class="reader-btn" id="zoom-out"><i class="fas fa-search-minus"></i></button>
+        <button class="reader-btn" id="zoom-in"><i class="fas fa-search-plus"></i></button>
+        <button class="reader-btn primary" id="toggle-ai"><i class="fas fa-robot"></i> Ask AI</button>
+      </div>
+    </header>
+
+    <main class="reader-main" id="reader-main">
+      <canvas id="pdf-canvas"></canvas>
+    </main>
+
+    <footer class="reader-footer">
+      <div class="page-controls">
+        <button id="prev-page" disabled><i class="fas fa-chevron-left"></i></button>
+        <span id="page-num">1</span> / <span id="page-count">--</span>
+        <button id="next-page"><i class="fas fa-chevron-right"></i></button>
+      </div>
+      <div class="progress-container">
+        <div class="progress-fill" id="progress-fill"></div>
+      </div>
+      <div class="sync-status" id="sync-status">
+        <i class="fas fa-cloud"></i> Synced
+      </div>
+    </footer>
+
+    <aside id="ai-panel">
+      <div class="ai-header">
+        <strong><i class="fas fa-robot" style="color:var(--accent)"></i> AI Teacher Context</strong>
+        <button class="reader-btn" id="close-ai" style="width: 28px; height: 28px;"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="ai-messages" id="ai-messages">
+        <div style="background: var(--bg-secondary); padding: 12px; border-radius: 8px; margin-bottom: 12px; font-size: 14px;">
+          Hi! I can see the page you're currently reading. Ask me to summarize it, explain a concept, or quiz you!
+        </div>
+      </div>
+      <div class="ai-input">
+        <input type="text" id="ai-prompt" placeholder="Ask about this page...">
+        <button class="reader-btn primary" id="ai-send" style="padding: 0; width: 42px; border-radius: 50%;"><i class="fas fa-paper-plane"></i></button>
+      </div>
+    </aside>
+
+    <div class="toast" id="toast" role="status"></div>
+    <script type="module" src="/js/supabase.js"></script>
+    <script type="module" src="/js/reader.js"></script>
+  </body>
+</html>
