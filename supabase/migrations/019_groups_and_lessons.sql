@@ -19,26 +19,31 @@ CREATE TABLE IF NOT EXISTS public.group_join_requests (
 
 ALTER TABLE public.group_join_requests ENABLE ROW LEVEL SECURITY;
 
+DROP TRIGGER IF EXISTS trg_group_join_requests_updated_at ON public.group_join_requests;
 CREATE TRIGGER trg_group_join_requests_updated_at
 BEFORE UPDATE ON public.group_join_requests
 FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
 
 -- Policies for join requests
 -- Users can see their own requests
+DROP POLICY IF EXISTS "Users can see own join requests" ON public.group_join_requests;
 CREATE POLICY "Users can see own join requests" ON public.group_join_requests 
 FOR SELECT TO authenticated USING (auth.uid() = user_id);
 
 -- Group admins can see requests for their groups
+DROP POLICY IF EXISTS "Admins can see group requests" ON public.group_join_requests;
 CREATE POLICY "Admins can see group requests" ON public.group_join_requests 
 FOR SELECT TO authenticated USING (
     EXISTS (SELECT 1 FROM public.study_groups WHERE id = group_id AND created_by = auth.uid())
 );
 
 -- Users can create requests for themselves
+DROP POLICY IF EXISTS "Users can request to join" ON public.group_join_requests;
 CREATE POLICY "Users can request to join" ON public.group_join_requests 
 FOR INSERT TO authenticated WITH CHECK (auth.uid() = user_id);
 
 -- Admins can update requests
+DROP POLICY IF EXISTS "Admins can update requests" ON public.group_join_requests;
 CREATE POLICY "Admins can update requests" ON public.group_join_requests 
 FOR UPDATE TO authenticated USING (
     EXISTS (SELECT 1 FROM public.study_groups WHERE id = group_id AND created_by = auth.uid())
@@ -47,6 +52,7 @@ FOR UPDATE TO authenticated USING (
 );
 
 -- Users can delete their own pending requests
+DROP POLICY IF EXISTS "Users can delete own requests" ON public.group_join_requests;
 CREATE POLICY "Users can delete own requests" ON public.group_join_requests 
 FOR DELETE TO authenticated USING (auth.uid() = user_id);
 
@@ -62,12 +68,14 @@ CREATE TABLE IF NOT EXISTS public.group_posts (
 
 ALTER TABLE public.group_posts ENABLE ROW LEVEL SECURITY;
 
+DROP TRIGGER IF EXISTS trg_group_posts_updated_at ON public.group_posts;
 CREATE TRIGGER trg_group_posts_updated_at
 BEFORE UPDATE ON public.group_posts
 FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
 
 -- Policies for group posts
 -- Group members can read posts
+DROP POLICY IF EXISTS "Members can read posts" ON public.group_posts;
 CREATE POLICY "Members can read posts" ON public.group_posts 
 FOR SELECT TO authenticated USING (
     EXISTS (SELECT 1 FROM public.group_members WHERE group_id = public.group_posts.group_id AND user_id = auth.uid())
@@ -76,6 +84,7 @@ FOR SELECT TO authenticated USING (
 );
 
 -- Group members can create posts
+DROP POLICY IF EXISTS "Members can create posts" ON public.group_posts;
 CREATE POLICY "Members can create posts" ON public.group_posts 
 FOR INSERT TO authenticated WITH CHECK (
     (EXISTS (SELECT 1 FROM public.group_members WHERE group_id = public.group_posts.group_id AND user_id = auth.uid())
@@ -85,6 +94,7 @@ FOR INSERT TO authenticated WITH CHECK (
 );
 
 -- Users can delete own posts or admins can delete any
+DROP POLICY IF EXISTS "Users can delete own posts or admins can delete" ON public.group_posts;
 CREATE POLICY "Users can delete own posts or admins can delete" ON public.group_posts 
 FOR DELETE TO authenticated USING (
     auth.uid() = user_id
@@ -105,6 +115,7 @@ CREATE TABLE IF NOT EXISTS public.group_materials (
 ALTER TABLE public.group_materials ENABLE ROW LEVEL SECURITY;
 
 -- Group members can read group materials
+DROP POLICY IF EXISTS "Members can read group materials" ON public.group_materials;
 CREATE POLICY "Members can read group materials" ON public.group_materials 
 FOR SELECT TO authenticated USING (
     EXISTS (SELECT 1 FROM public.group_members WHERE group_id = public.group_materials.group_id AND user_id = auth.uid())
@@ -113,6 +124,7 @@ FOR SELECT TO authenticated USING (
 );
 
 -- Group members can share their own materials
+DROP POLICY IF EXISTS "Members can share materials" ON public.group_materials;
 CREATE POLICY "Members can share materials" ON public.group_materials 
 FOR INSERT TO authenticated WITH CHECK (
     (EXISTS (SELECT 1 FROM public.group_members WHERE group_id = public.group_materials.group_id AND user_id = auth.uid())
@@ -122,6 +134,7 @@ FOR INSERT TO authenticated WITH CHECK (
 );
 
 -- Sharers can unshare, admins can remove any
+DROP POLICY IF EXISTS "Sharers or admins can remove materials" ON public.group_materials;
 CREATE POLICY "Sharers or admins can remove materials" ON public.group_materials 
 FOR DELETE TO authenticated USING (
     auth.uid() = shared_by
@@ -131,6 +144,8 @@ FOR DELETE TO authenticated USING (
 
 -- 5. Allow group members to read the actual learning_materials if shared to a group they are in
 -- Note: learning_materials already has a policy "users can manage own materials". We need to ADD a select policy.
+DROP POLICY IF EXISTS "Members can read shared learning_materials" ON public.learning_materials;
+DROP POLICY IF EXISTS "Members can read shared learning_materials" ON public.learning_materials;
 CREATE POLICY "Members can read shared learning_materials" ON public.learning_materials 
 FOR SELECT TO authenticated USING (
     EXISTS (
@@ -147,12 +162,8 @@ FOR SELECT TO authenticated USING (
 );
 
 -- 6. Update study_groups policies for public groups
--- Currently in 006:
--- create policy "members can read group" on public.study_groups for select using (
---   exists (select 1 from public.group_members where group_id = id and user_id = auth.uid()) or created_by = auth.uid()
--- );
--- We need to DROP it and replace it so anyone can see public groups.
 DROP POLICY IF EXISTS "members can read group" ON public.study_groups;
+DROP POLICY IF EXISTS "anyone can read public groups or members can read private" ON public.study_groups;
 CREATE POLICY "anyone can read public groups or members can read private" ON public.study_groups 
 FOR SELECT TO authenticated USING (
     is_public = true 
@@ -161,5 +172,7 @@ FOR SELECT TO authenticated USING (
 );
 
 -- Ensure group admins can update group info
+DROP POLICY IF EXISTS "Admins can update group" ON public.study_groups;
+DROP POLICY IF EXISTS "Admins can update group" ON public.study_groups;
 CREATE POLICY "Admins can update group" ON public.study_groups 
 FOR UPDATE TO authenticated USING (created_by = auth.uid()) WITH CHECK (created_by = auth.uid());
