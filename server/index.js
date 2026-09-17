@@ -42,7 +42,7 @@ export const authenticate = async (request, response, next) => {
   next();
 };
 
-app.get('/api/health', (_request, response) => {
+app.get(['/api/health', '/health'], (_request, response) => {
   response.json({ 
     status: 'ok', 
     services: { 
@@ -59,7 +59,7 @@ app.get('/api/health', (_request, response) => {
   });
 });
 
-app.get('/api/config', (_request, response) => {
+app.get(['/api/config', '/config'], (_request, response) => {
   response.json({ supabaseUrl, supabaseAnonKey: supabaseKey });
 });
 
