@@ -21,7 +21,7 @@ const loadAssignments = async () => {
   try {
     const res = await fetch('/api/study/assignments', { headers: headers() });
     let rawData = await res.json();
-    const data = Array.isArray(rawData) ? rawData : (Array.isArray(rawData?.assignments) ? rawData.assignments : []);
+    const data = Array.isArray(rawData) ? rawData : (Array.isArray(rawData?.data) ? rawData.data : (Array.isArray(rawData?.assignments) ? rawData.assignments : []));
     
     const list = document.getElementById('assignment-list');
     list.innerHTML = '';
@@ -60,7 +60,7 @@ const loadTimetable = async () => {
   try {
     const res = await fetch('/api/study/timetable', { headers: headers() });
     let rawData = await res.json();
-    const data = Array.isArray(rawData) ? rawData : (Array.isArray(rawData?.timetable) ? rawData.timetable : []);
+    const data = Array.isArray(rawData) ? rawData : (Array.isArray(rawData?.data) ? rawData.data : (Array.isArray(rawData?.timetable) ? rawData.timetable : []));
     
     const list = document.getElementById('timetable-list');
     list.innerHTML = '';

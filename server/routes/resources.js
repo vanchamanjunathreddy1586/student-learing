@@ -1,10 +1,25 @@
 import { Router } from 'express';
 import { getCachedResponse, setCachedResponse } from '../utils/cache.js';
+import { createClient } from '@supabase/supabase-js';
 
 export const resourcesRouter = Router();
 
 const OPENLIBRARY_BASE = process.env.OPENLIBRARY_BASE_URL || 'https://openlibrary.org';
 const GUTENDEX_BASE = process.env.GUTENDEX_BASE_URL || 'https://gutendex.com';
+
+const getSupabaseClient = (req) => {
+  return createClient(
+    process.env.SUPABASE_URL || '', 
+    process.env.SUPABASE_ANON_KEY || process.env.SUPABASE_PUBLISHABLE_KEY || '', 
+    {
+      global: {
+        headers: {
+          Authorization: req.headers.authorization || ''
+        }
+      }
+    }
+  );
+};
 
 // 1. Open Library Book Search
 resourcesRouter.get('/books/search', async (req, res) => {
@@ -121,6 +136,90 @@ resourcesRouter.get('/ebooks/search', async (req, res) => {
   } catch (error) {
     console.error('Gutendex Search Error:', error);
     res.status(503).json({ success: false, error: { code: 'RESOURCE_PROVIDER_UNAVAILABLE', message: 'The resource service is temporarily unavailable.' } });
+  }
+});
+
+// 4. Save Resource
+resourcesRouter.post('/save', async (req, res) => {
+  try {
+    const user_id = req.user?.id;
+    if (!user_id) return res.status(401).json({ success: false, error: { message: 'Unauthorized' } });
+
+    const { provider, external_id, resource_type, title, description, author, cover_url, resource_url, metadata } = req.body;
+    if (!provider || !external_id || !resource_type) {
+      return res.status(400).json({ success: false, error: { message: 'Missing required fields (provider, external_id, resource_type)' } });
+    }
+
+    const supabase = getSupabaseClient(req);
+    const { data, error } = await supabase.from('learning_resources').insert({
+      user_id, // always enforce backend auth ID
+      provider,
+      external_id,
+      resource_type,
+      title,
+      description,
+      author,
+      cover_url,
+      resource_url,
+      metadata: metadata || {}
+    }).select().single();
+
+    if (error) {
+      if (error.code === '23505') { // Unique constraint violation
+        return res.status(409).json({ success: false, error: { code: 'CONFLICT', message: 'Resource already saved.' } });
+      }
+      throw new Error(`Supabase insert error: ${error.message}`);
+    }
+
+    res.json({ success: true, data });
+  } catch (error) {
+    console.error('Save Resource Error:', error);
+    res.status(500).json({ success: false, error: { message: 'Failed to save resource' } });
+  }
+});
+
+// 5. Get Saved Resources
+resourcesRouter.get('/saved', async (req, res) => {
+  try {
+    const user_id = req.user?.id;
+    if (!user_id) return res.status(401).json({ success: false, error: { message: 'Unauthorized' } });
+
+    const supabase = getSupabaseClient(req);
+    const { data, error } = await supabase.from('learning_resources')
+      .select('*')
+      .eq('user_id', user_id)
+      .order('created_at', { ascending: false });
+
+    if (error) throw new Error(`Supabase select error: ${error.message}`);
+
+    res.json({ success: true, data });
+  } catch (error) {
+    console.error('Get Saved Resources Error:', error);
+    res.status(500).json({ success: false, error: { message: 'Failed to retrieve saved resources' } });
+  }
+});
+
+// 6. Delete Saved Resource
+resourcesRouter.delete('/saved/:id', async (req, res) => {
+  try {
+    const user_id = req.user?.id;
+    if (!user_id) return res.status(401).json({ success: false, error: { message: 'Unauthorized' } });
+
+    const resourceId = req.params.id;
+    const supabase = getSupabaseClient(req);
+    
+    // RLS will also protect this, but we explicitly enforce eq('user_id')
+    const { error } = await supabase.from('learning_resources')
+      .delete()
+      .eq('id', resourceId)
+      .eq('user_id', user_id);
+
+    if (error) throw new Error(`Supabase delete error: ${error.message}`);
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Delete Saved Resource Error:', error);
+    res.status(500).json({ success: false, error: { message: 'Failed to delete resource' } });
   }
 });
 

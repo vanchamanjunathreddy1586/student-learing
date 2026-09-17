@@ -19,7 +19,7 @@ const loadGroups = async () => {
     const res = await fetch('/api/groups', { headers: headers() });
     if (!res.ok) throw new Error('Failed to load groups');
     let rawData = await res.json();
-    const groups = Array.isArray(rawData) ? rawData : (Array.isArray(rawData?.groups) ? rawData.groups : []);
+    const groups = Array.isArray(rawData) ? rawData : (Array.isArray(rawData?.data) ? rawData.data : (Array.isArray(rawData?.groups) ? rawData.groups : []));
     
     const list = document.getElementById('groups-list');
     list.innerHTML = '';

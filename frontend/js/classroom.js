@@ -29,7 +29,7 @@ const loadSubjects = async () => {
     const res = await fetch('/api/classroom', { headers: headers() });
     if (!res.ok) throw new Error('Failed to load subjects');
     let data = await res.json();
-    const subjects = Array.isArray(data) ? data : (Array.isArray(data?.subjects) ? data.subjects : []);
+    const subjects = Array.isArray(data) ? data : (Array.isArray(data?.data) ? data.data : (Array.isArray(data?.subjects) ? data.subjects : []));
     
     const grid = document.getElementById('subjects-grid');
     // keep the add button

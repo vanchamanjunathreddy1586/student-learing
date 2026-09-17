@@ -138,13 +138,13 @@ const initialize = async () => {
     applySettings(); 
     renderTools(); 
     bindSettings(); 
-    shell.hidden = false; 
+    shell.hidden = false; shell.style.display = "block"; 
   } catch (error) { 
     console.error('Database error:', error); 
     showToast('Settings are temporarily unavailable.', 'error'); 
-    shell.hidden = false; 
+    shell.hidden = false; shell.style.display = "block"; 
   } finally { 
-    loading.hidden = true; 
+    loading.hidden = true; loading.style.display = "none"; 
   } 
 };
 initialize();
