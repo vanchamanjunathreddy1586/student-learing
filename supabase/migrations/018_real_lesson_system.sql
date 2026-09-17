@@ -1,4 +1,12 @@
--- Migration: 018_real_lesson_system.sql
+﻿-- Migration: 018_real_lesson_system.sql
+
+CREATE OR REPLACE FUNCTION public.set_updated_at()
+RETURNS TRIGGER AS $
+BEGIN
+  NEW.updated_at = NOW();
+  RETURN NEW;
+END;
+$ LANGUAGE plpgsql;
 -- Create tracking tables for user-uploaded lessons and their exact reading progress
 
 -- 1. Create storage bucket for learning materials if it doesn't exist
@@ -44,7 +52,7 @@ DROP TRIGGER IF EXISTS trg_learning_materials_updated_at ON public.learning_mate
 CREATE TRIGGER trg_learning_materials_updated_at
 BEFORE UPDATE ON public.learning_materials
 FOR EACH ROW
-EXECUTE FUNCTION public.update_learning_resources_updated_at();
+EXECUTE FUNCTION public.set_updated_at();
 
 -- 3. Create learning_progress table
 CREATE TABLE IF NOT EXISTS public.learning_progress (
@@ -96,4 +104,4 @@ DROP TRIGGER IF EXISTS trg_learning_progress_updated_at ON public.learning_progr
 CREATE TRIGGER trg_learning_progress_updated_at
 BEFORE UPDATE ON public.learning_progress
 FOR EACH ROW
-EXECUTE FUNCTION public.update_learning_resources_updated_at();
+EXECUTE FUNCTION public.set_updated_at();
