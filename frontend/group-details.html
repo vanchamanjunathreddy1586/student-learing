@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Group Details - Student Learning</title>
+  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="/css/app.css">
+  <link rel="stylesheet" href="/css/dashboard.css">
+  <link rel="stylesheet" href="/css/themes.css">
+  <link rel="stylesheet" href="/css/toast.css">
+  
+  <script src="/js/theme-manager.js"></script>
+  <style>
+    .group-header {
+      background: linear-gradient(135deg, var(--bg-card), #121c31);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 32px;
+      margin-bottom: 24px;
+      position: relative;
+      overflow: hidden;
+    }
+    .group-header::after {
+      content: '';
+      position: absolute;
+      right: -50px;
+      top: -50px;
+      width: 200px;
+      height: 200px;
+      background: radial-gradient(circle, var(--accent) 0%, transparent 70%);
+      opacity: 0.1;
+      border-radius: 50%;
+    }
+    .group-tabs button {
+      background: none;
+      border: none;
+      color: var(--text-secondary);
+      padding: 12px 24px;
+      cursor: pointer;
+      font-weight: 600;
+      border-bottom: 2px solid transparent;
+    }
+    .group-tabs button.active {
+      color: var(--accent);
+      border-bottom: 2px solid var(--accent);
+    }
+    .post-card {
+      background: #ffffff05;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+    .member-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+  </style>
+</head>
+<body class="dashboard-page">
+  <div class="dashboard-shell" id="dashboard-shell">
+    
+    <aside class="sidebar">
+      <div class="brand"><span class="brand-mark">✦</span><span>smart<br><b>learning</b></span></div>
+      <a class="profile-mini profile-link" href="/settings.html#account" aria-label="Open profile and settings"><div class="avatar" data-profile-initials>SL</div><div><strong data-profile-name>Student</strong><small>Profile &amp; settings</small></div><span class="status-dot"></span></a>
+      <nav aria-label="Main navigation">
+          <p class="nav-label">Workspace</p>
+          <a class="nav-item " href="/"><span>🏠</span> Overview</a>
+          <a class="nav-item " href="/ai-teacher.html"><span>🤖</span> AI Teacher</a>
+          <a class="nav-item " href="/scan-learn.html"><span>📷</span> Scan & Learn</a>
+          <a class="nav-item " href="/study-planner.html"><span>📅</span> Study planner</a>
+          
+          <p class="nav-label">Learn</p>
+          <a class="nav-item " href="/subjects.html"><span>📚</span> My Subjects</a>
+            <a class="nav-item " href="/lessons.html"><span>📖</span> Lessons</a>
+          <a class="nav-item " href="/quiz.html"><span>📝</span> Quizzes</a>
+          <a class="nav-item active" href="/groups.html"><span>👥</span> Study Groups</a>
+          <a class="nav-item " href="/analytics.html"><span>📈</span> Analytics & Gamification</a>
+          
+          <p class="nav-label">Tools</p>
+          <a class="nav-item " href="/research.html"><span>🔬</span> Research Assistant</a>
+          <a class="nav-item " href="/resources.html"><span>📖</span> Resource Library</a>
+          <a class="nav-item " href="/coding.html"><span>💻</span> Coding Lab</a>
+          
+          <p class="nav-label">Personal</p>
+          <a class="nav-item " href="/diary.html"><span>📔</span> Student Diary</a>
+        </nav>
+      <div class="sidebar-foot">
+        <a class="nav-item" href="/settings.html"><span>⚙</span> AI settings</a>
+        <button class="sign-out-button" id="sign-out-button" type="button">↪ Sign out</button>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <header class="topbar">
+        <div class="breadcrumbs">
+          <a href="/groups.html" style="color:var(--text-secondary); text-decoration:none;"><i class="fas fa-arrow-left"></i> Back to Groups</a>
+        </div>
+      </header>
+      
+      <div id="loading" style="text-align: center; padding: 60px 0;">
+        <i class="fas fa-spinner fa-spin" style="font-size: 32px; color: var(--accent); margin-bottom: 16px;"></i>
+        <p class="muted">Loading group...</p>
+      </div>
+
+      <div id="group-content" style="display: none; padding: 24px;">
+        
+        <div class="group-header reveal">
+          <div style="display: flex; gap: 12px; margin-bottom: 16px;">
+            <span id="gh-subject" style="font-size:12px; background:#ffffff0a; padding:4px 8px; border-radius:4px; color:var(--text-secondary);">Subject</span>
+            <span id="gh-privacy" style="font-size:12px; background:#ffffff0a; padding:4px 8px; border-radius:4px; color:var(--text-secondary);">Public</span>
+            <span id="gh-members" style="font-size:12px; background:#ffffff0a; padding:4px 8px; border-radius:4px; color:var(--text-secondary);"><i class="fas fa-users"></i> 0</span>
+          </div>
+          <h1 id="gh-name" style="margin: 0 0 12px 0; font-size: 32px;">Group Name</h1>
+          <p id="gh-desc" style="color: var(--text-secondary); max-width: 600px; line-height: 1.6; margin: 0;">Description...</p>
+        </div>
+
+        <div class="group-tabs reveal" style="display: flex; border-bottom: 1px solid var(--border); margin-bottom: 24px; overflow-x: auto;">
+          <button class="active" data-tab="discussion">Discussion</button>
+          <button data-tab="materials">Materials & Lessons</button>
+          <button data-tab="members">Members</button>
+          <button data-tab="admin" id="admin-tab" style="display:none; color: #ffd166;">Admin <span id="req-badge" style="display:none; background:var(--danger); color:white; border-radius:50%; padding:2px 6px; font-size:10px; margin-left:4px;">!</span></button>
+        </div>
+
+        <!-- DISCUSSION TAB -->
+        <div id="tab-discussion" class="tab-content">
+          <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 24px;">
+            <textarea id="post-content" placeholder="Share something with the group..." rows="3" style="width: 100%; background: #ffffff08; border: 1px solid var(--border); color: var(--text-primary); padding: 12px; border-radius: 8px; outline: none; box-sizing: border-box; font-family: inherit; resize: vertical; margin-bottom: 12px;"></textarea>
+            <div style="text-align: right;">
+              <button id="submit-post" class="primary-btn">Post Message</button>
+            </div>
+          </div>
+          <div id="posts-container">
+            <!-- Posts render here -->
+          </div>
+        </div>
+
+        <!-- MATERIALS TAB -->
+        <div id="tab-materials" class="tab-content" style="display: none;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+            <h3 style="margin:0;">Group Materials</h3>
+            <button class="primary-btn" id="share-material-btn" style="padding: 8px 16px; font-size: 14px;"><i class="fas fa-plus"></i> Share from My Lessons</button>
+          </div>
+          <div id="materials-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px;">
+            <!-- Shared materials render here -->
+          </div>
+        </div>
+
+        <!-- MEMBERS TAB -->
+        <div id="tab-members" class="tab-content" style="display: none;">
+          <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px;">
+            <h3 style="margin:0 0 16px 0;">Group Members</h3>
+            <div id="members-list">
+              <!-- Members render here -->
+            </div>
+          </div>
+        </div>
+
+        <!-- ADMIN TAB -->
+        <div id="tab-admin" class="tab-content" style="display: none;">
+          <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 24px;">
+            <h3 style="margin:0 0 16px 0;">Join Requests</h3>
+            <div id="requests-list">
+              <!-- Requests render here -->
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+  
+  <div id="toast" class="toast"></div>
+
+  <!-- Share Material Modal -->
+  <div id="share-modal" class="modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:1000; align-items:center; justify-content:center;">
+    <div class="modal-content" style="background:var(--surface); padding:32px; border-radius:16px; width:90%; max-width:500px; border:1px solid var(--border);">
+      <h2 style="margin-top:0; color:var(--text-primary);">Share Material to Group</h2>
+      <p style="color:var(--text-secondary); margin-bottom: 16px;">Select one of your existing lessons/materials to share.</p>
+      
+      <div id="my-materials-loading" style="text-align:center; padding: 20px;">
+        <i class="fas fa-spinner fa-spin" style="color:var(--accent);"></i>
+      </div>
+      
+      <div id="my-materials-list" style="display:none; max-height:300px; overflow-y:auto; border:1px solid var(--border); border-radius:8px; padding:8px;">
+        <!-- User materials list -->
+      </div>
+
+      <div style="display:flex; gap:12px; margin-top:24px;">
+        <button id="cancel-share" style="flex:1; padding:12px; background:transparent; border:1px solid var(--border); border-radius:8px; color:var(--text-secondary); cursor:pointer;">Cancel</button>
+        <button id="confirm-share" class="primary-btn" style="flex:1;" disabled>Share Selected</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="/js/supabase.js"></script>
+  <script type="module" src="/js/app.js"></script>
+  <script type="module" src="/js/group-details.js"></script>
+</body>
+</html>

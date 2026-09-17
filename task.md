@@ -1,0 +1,17 @@
+- [ ] Review existing schema for `study_groups`, `group_members`, `subjects`, `learning_materials`.
+- [ ] Create Migration `019_groups_and_lessons.sql`:
+  - [ ] Alter `study_groups` (add `subject`, `is_public`, `cover_image`).
+  - [ ] Create `group_join_requests` table with RLS.
+  - [ ] Create `group_materials` table with RLS.
+  - [ ] Create `group_posts` table with RLS.
+  - [ ] Update `learning_materials` policies to allow group members to read shared materials.
+- [ ] Apply Migration `019_groups_and_lessons.sql`.
+- [ ] Frontend: Create `subjects.html` and `js/subjects.js`.
+- [ ] Frontend: Create `groups.html` and `js/groups.js`.
+- [ ] Frontend: Create `group-details.html` and `js/group-details.js`.
+- [ ] Frontend: Update `lessons.html` and `js/lessons.js`.
+- [ ] Frontend: Update `index.html` and `dashboard.css` (Navigation & Layout).
+- [ ] Test Flow 1: Subject Creation and Lesson Upload.
+- [ ] Test Flow 2: Public Group creation and joining.
+- [ ] Test Flow 3: Private Group creation and join request flow.
+- [ ] Test Flow 4: Share lesson to group.
