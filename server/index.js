@@ -11,6 +11,11 @@ import knowledgeRouter from './routes/knowledge.js';
 import attendanceRouter from './routes/attendance.js';
 import ownerRouter from './routes/owner.js';
 import diaryRouter from './routes/diary.js';
+import resourcesRouter from './routes/resources.js';
+import learningRouter from './routes/learning.js';
+import researchRouter from './routes/research.js';
+import mathRouter from './routes/math.js';
+import codeRouter from './routes/code.js';
 
 const root = process.cwd();
 const app = express();
@@ -37,7 +42,20 @@ export const authenticate = async (request, response, next) => {
 };
 
 app.get('/api/health', (_request, response) => {
-  response.json({ status: 'ok', mode: supabase ? 'supabase' : 'local-demo' });
+  response.json({ 
+    status: 'ok', 
+    services: { 
+      supabase: supabase ? 'ok' : 'missing_config',
+      ai_gateway: process.env.GEMINI_API_KEY || process.env.OPENAI_API_KEY ? 'ok' : 'missing_config',
+      open_library: 'ok',
+      gutendex: 'ok',
+      dictionary: 'ok',
+      openalex: 'ok',
+      arxiv: 'ok',
+      newton: 'ok',
+      judge0: process.env.JUDGE0_API_KEY || process.env.JUDGE0_BASE_URL ? 'ok' : 'missing_config'
+    } 
+  });
 });
 
 app.get('/api/config', (_request, response) => {
@@ -59,6 +77,11 @@ app.use('/api/knowledge', authenticate, knowledgeRouter);
 app.use('/api/attendance', authenticate, attendanceRouter);
 app.use('/api/owner', authenticate, ownerRouter);
 app.use('/api/diary', authenticate, diaryRouter);
+app.use('/api/resources', authenticate, resourcesRouter);
+app.use('/api/learning', authenticate, learningRouter);
+app.use('/api/learning/math', authenticate, mathRouter);
+app.use('/api/research', authenticate, researchRouter);
+app.use('/api/code', authenticate, codeRouter);
 
 // Removed the sendFile fallback because Vercel vercel.json handles frontend routing natively
 // and Lambda file systems do not always include static files.
