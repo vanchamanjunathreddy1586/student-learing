@@ -169,3 +169,11 @@ const mobileMenuBtn = document.querySelector('.mobile-menu');
     document.body.classList.add('sidebar-collapsed');
   }
   
+
+// Start Learning button click handler
+const resumeBtn = document.querySelector('#resume-btn');
+if (resumeBtn) {
+  resumeBtn.addEventListener('click', () => {
+    window.location.href = '/lessons.html';
+  });
+}
