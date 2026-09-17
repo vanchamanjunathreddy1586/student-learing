@@ -146,10 +146,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             <p style="font-size:14px; color:var(--text-secondary); margin:0 0 16px 0; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">${g.description || 'No description'}</p>
           </div>
           <div>
-            <div style="display:flex; justify-content:space-between; font-size:12px; color:var(--text-secondary); margin-bottom:16px;">
-              <span><i class="fas fa-users"></i> ${memberCount} Members</span>
-              <span>${g.is_public ? 'Public' : 'Private'}</span>
-            </div>
+              <div style="display:flex; justify-content:space-between; font-size:12px; color:var(--text-secondary); margin-bottom:16px; align-items:center;">
+                <span><i class="fas fa-users"></i> ${memberCount} Members</span>
+                <span class="badge" style="background: ${g.is_public ? 'rgba(98, 230, 226, 0.2)' : 'rgba(255, 107, 157, 0.2)'}; color: ${g.is_public ? 'var(--accent)' : 'var(--accent-secondary)'}; padding: 4px 8px; border-radius: 4px;">${g.is_public ? 'PUBLIC' : 'PRIVATE'}</span>
+              </div>
             ${actionBtn}
           </div>
         </article>
