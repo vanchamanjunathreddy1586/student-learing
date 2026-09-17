@@ -619,15 +619,33 @@ const handleProfileSubmit = async (event) => {
     await persistProfile(user);
     setBanner('Your student profile is ready!', 'success');
     setTimeout(() => goToDashboard(), 850);
-  } catch (error) {
-    console.error('Profile Error:', error);
-    console.error('Profile save failed:', error);
-    setBanner('We could not save your profile. Please check your connection and try again.', 'error');
-    button.disabled = false;
-    button.textContent = 'Continue →';
-  }
-};
+  
+    } catch (error) {
+      console.error('Profile save failed:', {
+        code: error?.code,
+        message: error?.message,
+        details: error?.details,
+        hint: error?.hint,
+        status: error?.status
+      });
 
+      let safeMessage = 'Your profile could not be saved. Please try again.';
+      if (error?.message?.includes('permission denied')) {
+        safeMessage = 'Database permissions error. Please contact support.';
+      } else if (error?.message?.includes('JWT') || error?.message?.includes('session')) {
+        safeMessage = 'Your session expired. Please log in again.';
+        setTimeout(() => setView('login'), 2000);
+      } else if (error?.status === 429) {
+        safeMessage = 'Too many requests. Please wait a moment and try again.';
+      } else if (error?.message === 'Failed to fetch' || error?.message?.includes('NetworkError')) {
+        safeMessage = 'Connection problem. Please check your internet and try again.';
+      }
+
+      setBanner(safeMessage, 'error');
+      button.disabled = false;
+      button.textContent = 'Continue →';
+    }
+  };
 const initializePasswordToggles = () => {
   document.querySelectorAll('[data-password-toggle]').forEach((button) => {
     const input = document.querySelector(`#${button.dataset.passwordToggle}`);
