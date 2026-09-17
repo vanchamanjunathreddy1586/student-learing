@@ -1,84 +1,498 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><script src="/js/theme-manager.js"></script>
-    
+<head>
+  <script src="/js/theme-manager.js"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
-  <title>Owner Portal | Smart Learning</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/css/auth.css">
-  <link rel="stylesheet" href="/css/dashboard.css">
-    <link rel="stylesheet" href="/css/themes.css">
+  <title>Owner Control Center | Smart Learning</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
   <style>
-    .admin-container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
-    .data-table { width: 100%; border-collapse: collapse; margin-top: 1rem; background: rgba(255, 255, 255, 0.03); border-radius: 12px; overflow-x: auto; display: block; white-space: nowrap; }
-    .data-table th, .data-table td { padding: 1rem; text-align: left; border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
-    @media (min-width: 768px) { .data-table { display: table; white-space: normal; } }
-    .data-table th { background: rgba(255, 255, 255, 0.05); color: #00f0ff; font-weight: 500; }
-    .form-group { margin-bottom: 1rem; }
-    .form-group label { display: block; margin-bottom: 0.5rem; color: rgba(255, 255, 255, 0.8); }
-    .form-group input { width: 100%; padding: 0.75rem; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; color: white; }
-    .btn-action { background: rgba(255, 255, 255, 0.1); border: none; color: white; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; transition: all 0.2s; }
-    .btn-action:hover { background: rgba(255, 255, 255, 0.2); }
-    .btn-danger { background: rgba(255, 51, 102, 0.2); color: #ff3366; }
-    .btn-danger:hover { background: rgba(255, 51, 102, 0.4); }
-    .add-form { background: rgba(255, 255, 255, 0.02); padding: 1.5rem; border-radius: 12px; margin-bottom: 2rem; border: 1px solid rgba(255, 255, 255, 0.05); }
+    :root {
+      --occ-bg: #030712;
+      --occ-surface: rgba(17, 24, 39, 0.7);
+      --occ-surface-hover: rgba(31, 41, 55, 0.8);
+      --occ-border: rgba(59, 130, 246, 0.2);
+      --occ-border-glow: rgba(59, 130, 246, 0.5);
+      --occ-accent: #3b82f6;
+      --occ-accent-glow: #60a5fa;
+      --occ-text: #f3f4f6;
+      --occ-text-muted: #9ca3af;
+      --occ-danger: #ef4444;
+      --occ-success: #10b981;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: var(--occ-bg);
+      color: var(--occ-text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Premium Futuristic Background */
+    .occ-bg-elements {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      z-index: -1;
+      pointer-events: none;
+      background: radial-gradient(circle at 15% 50%, rgba(59, 130, 246, 0.08) 0%, transparent 50%),
+                  radial-gradient(circle at 85% 30%, rgba(139, 92, 246, 0.08) 0%, transparent 50%);
+    }
+
+    .occ-grid {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background-image: 
+        linear-gradient(to right, rgba(255,255,255,0.02) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255,255,255,0.02) 1px, transparent 1px);
+      background-size: 50px 50px;
+      transform: perspective(500px) rotateX(60deg) scale(2);
+      transform-origin: top center;
+      animation: occGridMove 20s linear infinite;
+      opacity: 0.3;
+    }
+
+    @keyframes occGridMove {
+      0% { background-position: 0 0; }
+      100% { background-position: 0 50px; }
+    }
+
+    /* Layout */
+    .occ-layout {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    .occ-sidebar {
+      width: 280px;
+      background: rgba(3, 7, 18, 0.6);
+      backdrop-filter: blur(20px);
+      border-right: 1px solid var(--occ-border);
+      padding: 2rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      height: 100vh;
+      z-index: 10;
+    }
+
+    .occ-brand {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 3rem;
+    }
+
+    .occ-brand-icon {
+      width: 40px; height: 40px;
+      background: linear-gradient(135deg, var(--occ-accent), #8b5cf6);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      color: white;
+      box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
+    }
+
+    .occ-brand-text h1 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      background: linear-gradient(to right, #fff, #a5b4fc);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .occ-brand-text span {
+      font-size: 0.7rem;
+      color: var(--occ-text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .occ-nav {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      flex: 1;
+    }
+
+    .occ-nav-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem;
+      border-radius: 8px;
+      color: var(--occ-text-muted);
+      text-decoration: none;
+      transition: all 0.3s ease;
+      font-weight: 500;
+      border: 1px solid transparent;
+    }
+
+    .occ-nav-item:hover, .occ-nav-item.active {
+      background: rgba(59, 130, 246, 0.1);
+      color: var(--occ-text);
+      border-color: rgba(59, 130, 246, 0.3);
+      box-shadow: inset 0 0 20px rgba(59, 130, 246, 0.05);
+    }
+    
+    .occ-nav-item i { width: 20px; text-align: center; font-size: 1.1rem; }
+    .occ-nav-item.active i { color: var(--occ-accent-glow); }
+
+    .occ-main {
+      flex: 1;
+      margin-left: 280px;
+      padding: 2.5rem 3rem;
+      position: relative;
+    }
+
+    /* Topbar */
+    .occ-topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 3rem;
+    }
+
+    .occ-title h2 { font-size: 1.8rem; font-weight: 600; margin-bottom: 0.2rem; }
+    .occ-title p { color: var(--occ-text-muted); font-size: 0.9rem; }
+
+    .occ-actions {
+      display: flex;
+      gap: 1rem;
+    }
+
+    .occ-btn {
+      background: var(--occ-surface);
+      border: 1px solid var(--occ-border);
+      color: var(--occ-text);
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 500;
+      font-family: inherit;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      transition: all 0.2s;
+    }
+
+    .occ-btn:hover {
+      background: var(--occ-surface-hover);
+      border-color: var(--occ-border-glow);
+      transform: translateY(-1px);
+    }
+
+    .occ-btn-primary {
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2));
+      border-color: rgba(59, 130, 246, 0.5);
+      box-shadow: 0 0 15px rgba(59, 130, 246, 0.2);
+    }
+
+    .occ-btn-primary:hover {
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.3), rgba(139, 92, 246, 0.3));
+      box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
+    }
+
+    /* Cards Grid */
+    .occ-stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 3rem;
+    }
+
+    .occ-stat-card {
+      background: var(--occ-surface);
+      border: 1px solid var(--occ-border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      position: relative;
+      overflow: hidden;
+      backdrop-filter: blur(10px);
+    }
+
+    .occ-stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 2px;
+      background: linear-gradient(90deg, transparent, var(--occ-accent), transparent);
+      opacity: 0.5;
+    }
+
+    .occ-stat-icon {
+      width: 48px; height: 48px;
+      background: rgba(59, 130, 246, 0.1);
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.5rem;
+      color: var(--occ-accent-glow);
+      margin-bottom: 1rem;
+    }
+
+    .occ-stat-value {
+      font-size: 2.2rem;
+      font-weight: 700;
+      font-family: 'JetBrains Mono', monospace;
+      margin-bottom: 0.25rem;
+    }
+
+    .occ-stat-label {
+      color: var(--occ-text-muted);
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    /* Sections */
+    .occ-section {
+      background: var(--occ-surface);
+      border: 1px solid var(--occ-border);
+      border-radius: 16px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      backdrop-filter: blur(10px);
+    }
+
+    .occ-section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      padding-bottom: 1rem;
+    }
+
+    .occ-section-title h3 {
+      font-size: 1.2rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    
+    .occ-section-title i { color: var(--occ-accent-glow); }
+
+    /* Tables */
+    .occ-table-wrapper {
+      overflow-x: auto;
+    }
+
+    .occ-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .occ-table th {
+      text-align: left;
+      padding: 1rem;
+      color: var(--occ-text-muted);
+      font-weight: 500;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .occ-table td {
+      padding: 1.2rem 1rem;
+      border-bottom: 1px solid rgba(255,255,255,0.02);
+      font-size: 0.95rem;
+    }
+
+    .occ-table tbody tr:hover {
+      background: rgba(255,255,255,0.01);
+    }
+
+    .occ-badge {
+      padding: 0.35rem 0.75rem;
+      border-radius: 50px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .occ-badge.owner { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
+    .occ-badge.admin { background: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3); }
+    .occ-badge.lecturer { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+    .occ-badge.student { background: rgba(156, 163, 175, 0.15); color: #d1d5db; border: 1px solid rgba(156, 163, 175, 0.3); }
+
+    .occ-input-group {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+    
+    .occ-input {
+      background: rgba(0,0,0,0.3);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: white;
+      padding: 0.8rem 1rem;
+      border-radius: 8px;
+      font-family: inherit;
+      width: 100%;
+      transition: all 0.2s;
+    }
+    
+    .occ-input:focus {
+      outline: none;
+      border-color: var(--occ-accent);
+      box-shadow: 0 0 10px rgba(59, 130, 246, 0.2);
+    }
+    
+    .occ-form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    @media (max-width: 900px) {
+      .occ-layout { flex-direction: column; }
+      .occ-sidebar { width: 100%; height: auto; position: relative; padding: 1rem; border-right: none; border-bottom: 1px solid var(--occ-border); }
+      .occ-main { margin-left: 0; padding: 1.5rem; }
+      .occ-nav { flex-direction: row; flex-wrap: wrap; }
+      .occ-nav-item { padding: 0.75rem; flex: 1; justify-content: center; min-width: 120px; }
+      .occ-nav-item span { display: none; }
+      .occ-form-row { grid-template-columns: 1fr; }
+    }
   </style>
 </head>
 <body>
-  <div class="glass-background">
-    <div class="blur-circle circle-1"></div>
-    <div class="blur-circle circle-2"></div>
+  <div class="occ-bg-elements">
+    <div class="occ-grid"></div>
   </div>
-  <div class="admin-container">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-      <h1><span class="gradient-text">Owner</span> Portal</h1>
-      <div style="display: flex; gap: 1rem;">
-        <a href="/admin.html" class="auth-button" style="text-decoration: none; display: flex; align-items: center; padding: 0.5rem 1.5rem; width: auto; margin: 0; font-size: 0.9rem;">Manage Students & Attendance ➔</a>
-        <button id="logout-btn" class="btn-action">Log Out</button>
+
+  <div class="occ-layout">
+    <aside class="occ-sidebar">
+      <div class="occ-brand">
+        <div class="occ-brand-icon"><i class="fas fa-layer-group"></i></div>
+        <div class="occ-brand-text">
+          <h1>Control Center</h1>
+          <span>Owner Terminal</span>
+        </div>
       </div>
-    </div>
+      
+      <nav class="occ-nav">
+        <a href="#dashboard" class="occ-nav-item active"><i class="fas fa-chart-pie"></i> <span>Analytics</span></a>
+        <a href="#access" class="occ-nav-item"><i class="fas fa-shield-alt"></i> <span>Role Management</span></a>
+        <a href="/admin.html" class="occ-nav-item"><i class="fas fa-users-cog"></i> <span>Student UI Data</span></a>
+        <a href="#" class="occ-nav-item" id="logout-btn"><i class="fas fa-power-off"></i> <span>System Logout</span></a>
+      </nav>
+    </aside>
 
-    <div class="add-form">
-      <h3>Create New Admin Account</h3>
-      <form id="add-admin-form" style="display: flex; gap: 1rem; align-items: flex-end; flex-wrap: wrap;">
-        <div class="form-group" style="flex: 1; min-width: 200px; margin-bottom: 0;">
-          <label>Full Name</label>
-          <input type="text" id="admin-name" required placeholder="John Doe">
+    <main class="occ-main">
+      <header class="occ-topbar">
+        <div class="occ-title">
+          <h2>System Overview</h2>
+          <p>Real-time analytics and platform metrics</p>
         </div>
-        <div class="form-group" style="flex: 1; min-width: 200px; margin-bottom: 0;">
-          <label>Email Address</label>
-          <input type="email" id="admin-email" required placeholder="admin@example.com">
+        <div class="occ-actions">
+          <button class="occ-btn" onclick="window.location.reload()"><i class="fas fa-sync-alt"></i> Refresh Data</button>
         </div>
-        <div class="form-group" style="flex: 1; min-width: 200px; margin-bottom: 0;">
-          <label>Secure Password</label>
-          <input type="text" id="admin-password" required placeholder="SuperSecret123!">
-        </div>
-        <div class="form-group" style="flex: 1; min-width: 150px; margin-bottom: 0;">
-          <label>Role</label>
-          <select id="admin-role" required>
-            <option value="admin">Administrator</option>
-            <option value="lecturer">Lecturer</option>
-          </select>
-        </div>
-        <button type="submit" class="auth-button" style="width: auto; margin-top: 0;">Create Staff</button>
-      </form>
-      <div id="admin-message" style="margin-top: 1rem; color: #00ff88; font-weight: 500;"></div>
-    </div>
+      </header>
 
-    <h2>Administrators</h2>
-    <table class="data-table" id="admins-table">
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Email</th>
-          <th>Role</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
+      <!-- Analytics Dashboard -->
+      <section id="dashboard">
+        <div class="occ-stats-grid">
+          <div class="occ-stat-card">
+            <div class="occ-stat-icon"><i class="fas fa-users"></i></div>
+            <div class="occ-stat-value" id="stat-students">0</div>
+            <div class="occ-stat-label">Total Users</div>
+          </div>
+          <div class="occ-stat-card">
+            <div class="occ-stat-icon" style="color: #10b981; background: rgba(16, 185, 129, 0.1);"><i class="fas fa-file-alt"></i></div>
+            <div class="occ-stat-value" id="stat-materials">0</div>
+            <div class="occ-stat-label">Learning Materials</div>
+          </div>
+          <div class="occ-stat-card">
+            <div class="occ-stat-icon" style="color: #f59e0b; background: rgba(245, 158, 11, 0.1);"><i class="fas fa-brain"></i></div>
+            <div class="occ-stat-value" id="stat-ai">0</div>
+            <div class="occ-stat-label">AI Interactions</div>
+          </div>
+          <div class="occ-stat-card">
+            <div class="occ-stat-icon" style="color: #8b5cf6; background: rgba(139, 92, 246, 0.1);"><i class="fas fa-bolt"></i></div>
+            <div class="occ-stat-value" id="stat-active">0</div>
+            <div class="occ-stat-label">Active Today (Est)</div>
+          </div>
+        </div>
+
+        <div class="occ-section">
+          <div class="occ-section-header">
+            <div class="occ-section-title">
+              <h3><i class="fas fa-history"></i> Recent Activity Feed</h3>
+            </div>
+          </div>
+          <div class="occ-table-wrapper">
+            <table class="occ-table" id="activity-table">
+              <thead>
+                <tr>
+                  <th>User</th>
+                  <th>Role</th>
+                  <th>College/Context</th>
+                  <th>Last Active</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td colspan="4" style="text-align: center; color: var(--occ-text-muted);">Loading telemetry...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- Role Management -->
+      <section id="access" class="occ-section">
+        <div class="occ-section-header">
+          <div class="occ-section-title">
+            <h3><i class="fas fa-shield-alt"></i> Access Control Matrix</h3>
+          </div>
+        </div>
+        
+        <form id="add-admin-form" style="background: rgba(0,0,0,0.2); padding: 1.5rem; border-radius: 12px; margin-bottom: 2rem; border: 1px dashed rgba(255,255,255,0.1);">
+          <h4 style="margin-bottom: 1rem; color: var(--occ-text-muted); font-size: 0.9rem; text-transform: uppercase;">Provision New Staff Account</h4>
+          <div class="occ-form-row">
+            <input type="text" id="admin-name" class="occ-input" required placeholder="Full Name (e.g. Dr. Smith)">
+            <input type="email" id="admin-email" class="occ-input" required placeholder="Official Email">
+          </div>
+          <div class="occ-form-row" style="margin-top: 1rem;">
+            <input type="text" id="admin-password" class="occ-input" required placeholder="Secure Password">
+            <select id="admin-role" class="occ-input" required>
+              <option value="admin">System Administrator</option>
+              <option value="lecturer">Lecturer / Faculty</option>
+            </select>
+          </div>
+          <div style="margin-top: 1.5rem; display: flex; justify-content: space-between; align-items: center;">
+            <span id="admin-message" style="color: var(--occ-success); font-weight: 500; font-size: 0.9rem;"></span>
+            <button type="submit" class="occ-btn occ-btn-primary"><i class="fas fa-plus"></i> Initialize Account</button>
+          </div>
+        </form>
+
+        <div class="occ-table-wrapper">
+          <table class="occ-table" id="admins-table">
+            <thead>
+              <tr>
+                <th>Identity</th>
+                <th>Clearance Level</th>
+                <th>System Operations</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td colspan="3" style="text-align: center; color: var(--occ-text-muted);">Fetching authorized personnel...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+    </main>
   </div>
+
   <script type="module" src="js/owner.js"></script>
 </body>
 </html>

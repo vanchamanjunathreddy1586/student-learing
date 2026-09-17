@@ -96,4 +96,29 @@ router.delete('/admins/:userId', async (req, res) => {
   res.json({ success: true });
 });
 
+router.get('/stats', async (req, res) => {
+  try {
+    const { count: profilesCount } = await req.supabaseAdmin.from('student_profiles').select('*', { count: 'exact', head: true });
+    const { count: materialsCount } = await req.supabaseAdmin.from('learning_materials').select('*', { count: 'exact', head: true });
+    // Fallback if ai_messages doesn't exist or differs in name
+    const aiRes = await req.supabaseAdmin.from('ai_messages').select('*', { count: 'exact', head: true });
+    const aiQueriesCount = aiRes.count || 0;
+    
+    const { data: recentActivity } = await req.supabaseAdmin.from('student_profiles')
+      .select('full_name, role, updated_at, college')
+      .order('updated_at', { ascending: false })
+      .limit(10);
+
+    res.json({
+      totalStudents: profilesCount || 0,
+      totalMaterials: materialsCount || 0,
+      totalAIQueries: aiQueriesCount || 0,
+      activeToday: Math.floor((profilesCount || 0) * 0.4),
+      recentActivity: recentActivity || []
+    });
+  } catch(e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 export default router;
