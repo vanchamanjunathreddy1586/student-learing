@@ -80,7 +80,11 @@
           <h3 style="font-family:'Space Grotesk'; margin:0 0 10px;">Drag & Drop your file</h3>
           <p class="muted" style="margin-bottom:20px;">Supports Images, PDFs, and Text files</p>
           <input type="file" id="file-input" style="display:none;" accept=".txt,.png,.jpg,.jpeg">
-          <button class="primary-btn" onclick="document.getElementById('file-input').click()">Browse Files</button>
+          <input type="file" id="camera-input" style="display:none;" accept="image/*" capture="environment">
+          <div style="display: flex; gap: 10px; justify-content: center;">
+            <button class="primary-btn" onclick="document.getElementById('file-input').click()">Browse Files</button>
+            <button class="btn-secondary" style="border:1px solid var(--dash-cyan); background:transparent; color:var(--dash-cyan); border-radius:8px;" onclick="document.getElementById('camera-input').click()">+F Take Photo</button>
+          </div>
         </div>
       </div>
 
@@ -116,6 +120,7 @@
     </main>
   </div>
   <div class="toast" id="toast" role="status"></div>
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
   <script type="module" src="/js/supabase.js"></script>
   <script type="module" src="/js/scan-learn.js"></script>
 <script type="module" src="/js/app.js"></script>

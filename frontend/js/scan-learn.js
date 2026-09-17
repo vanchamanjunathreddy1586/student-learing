@@ -7,6 +7,7 @@ const headers = () => {
 
 const dropZone = document.getElementById('drop-zone');
 const fileInput = document.getElementById('file-input');
+const cameraInput = document.getElementById('camera-input');
 const uploadView = document.getElementById('upload-view');
 const loadingState = document.getElementById('loading-state');
 const resultView = document.getElementById('result-view');
@@ -25,6 +26,12 @@ fileInput.onchange = (e) => {
   if (e.target.files.length) handleFile(e.target.files[0]);
 };
 
+if (cameraInput) {
+  cameraInput.onchange = (e) => {
+    if (e.target.files.length) handleFile(e.target.files[0]);
+  };
+}
+
 const handleFile = async (file) => {
   uploadView.style.display = 'none';
   loadingState.style.display = 'block';
@@ -37,10 +44,22 @@ const handleFile = async (file) => {
     // In production, you'd send the file to a backend endpoint with Tesseract or vision model
     if (file.type.startsWith('text/')) {
       textContent = await file.text();
+    } else if (file.type.startsWith('image/')) {
+      // Real OCR using Tesseract.js
+      document.getElementById('loading-text').textContent = 'Extracting text from image...';
+      const result = await Tesseract.recognize(file, 'eng', {
+        logger: m => {
+          if (m.status === 'recognizing text') {
+            document.getElementById('loading-text').textContent = `Extracting text: ${Math.round(m.progress * 100)}%`;
+          }
+        }
+      });
+      textContent = result.data.text;
+      if (!textContent.trim()) {
+        throw new Error('No text could be extracted from this image. Please try a clearer image.');
+      }
     } else {
-      // Simulate OCR for images
-      await new Promise(r => setTimeout(r, 1500));
-      textContent = `Simulated OCR text extracted from ${file.name}.\nThis document discusses fundamental concepts of computer science including algorithms, data structures, and the importance of Big-O notation in evaluating performance.`;
+      throw new Error('Unsupported file type. Please upload an image or a text file.');
     }
     
     extractedText.textContent = textContent;
