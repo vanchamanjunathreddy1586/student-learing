@@ -178,12 +178,10 @@ const sendMessage = async (presetText = null) => {
       .then(({ error }) => { if (error) console.error('Database error:', error); });
     }
     
-  } catch (error) {
-    console.error(error);
+  } catch (err) {
+    console.error('AI Error:', err);
     document.getElementById('typing-indicator')?.remove();
-    
-    const errBubble = appendMessage("Sorry, I couldn't connect to your AI Teacher right now.<br><br><button class='quick-action-chip' data-prompt='" + text.replace(/'/g, "&#39;") + "'>Retry</button>", 'ai', false, new Date(), true);
-
+    appendMessage(err.message || 'Sorry, I am having trouble connecting to the AI gateway.', 'error');
   } finally {
     sendBtn.disabled = false;
     chatInput.focus();

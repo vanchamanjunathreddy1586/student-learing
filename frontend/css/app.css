@@ -31,3 +31,6 @@
 .chatbot-fab {
   position: relative !important;
 }
+
+ @ m e d i a   ( m a x - h e i g h t :   5 0 0 p x )   {   . c h a t b o t - w i n d o w   {   h e i g h t :   c a l c ( 1 0 0 d v h   -   1 0 0 p x )   ! i m p o r t a n t ;   b o t t o m :   8 0 p x   ! i m p o r t a n t ;   }   }  
+ 

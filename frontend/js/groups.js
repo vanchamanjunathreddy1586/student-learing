@@ -17,7 +17,9 @@ let currentGroupId = null;
 const loadGroups = async () => {
   try {
     const res = await fetch('/api/groups', { headers: headers() });
-    const groups = await res.json();
+    if (!res.ok) throw new Error('Failed to load groups');
+    let rawData = await res.json();
+    const groups = Array.isArray(rawData) ? rawData : (Array.isArray(rawData?.groups) ? rawData.groups : []);
     
     const list = document.getElementById('groups-list');
     list.innerHTML = '';
@@ -67,7 +69,9 @@ const openGroup = (group) => {
 const loadNotes = async (groupId) => {
   try {
     const res = await fetch(`/api/groups/${groupId}/notes`, { headers: headers() });
-    const notes = await res.json();
+    if (!res.ok) throw new Error('Failed to load notes');
+    let rawData = await res.json();
+    const notes = Array.isArray(rawData) ? rawData : (Array.isArray(rawData?.notes) ? rawData.notes : []);
     
     const list = document.getElementById('notes-list');
     list.innerHTML = '';

@@ -33,8 +33,7 @@ router.post('/chat', async (req, res) => {
   try {
     const defaultProvider = getActiveProviderId();
     if (!defaultProvider) {
-      console.error("No valid AI provider configured for production.");
-      return res.status(503).json({ error: 'AI_UNAVAILABLE', message: 'AI Teacher is temporarily unavailable.' });
+      throw new Error("AI Configuration Missing: Please set GEMINI_API_KEY or OPENAI_API_KEY in the environment.");
     }
     
     const { prompt, task, context, provider = defaultProvider } = req.body;
@@ -54,9 +53,7 @@ router.post('/chat/stream', async (req, res) => {
   try {
     const defaultProvider = getActiveProviderId();
     if (!defaultProvider) {
-      console.error("No valid AI provider configured for production.");
-      res.write(`data: ${JSON.stringify({ error: 'AI_UNAVAILABLE', message: 'AI Teacher is temporarily unavailable.' })}\n\n`);
-      return res.end();
+      throw new Error("AI Configuration Missing: Please set GEMINI_API_KEY or OPENAI_API_KEY in the environment.");
     }
     
     const { prompt, task, context, provider = defaultProvider } = req.body;
@@ -84,8 +81,7 @@ router.post('/quiz', async (req, res) => {
   try {
     const defaultProvider = getActiveProviderId();
     if (!defaultProvider) {
-      console.error("No valid AI provider configured for production.");
-      return res.status(503).json({ error: 'AI_UNAVAILABLE', message: 'Quiz generation is temporarily unavailable.' });
+      throw new Error("AI Configuration Missing: Please set GEMINI_API_KEY or OPENAI_API_KEY in the environment.");
     }
     
     const { topic, provider = defaultProvider } = req.body;

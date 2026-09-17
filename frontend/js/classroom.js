@@ -28,7 +28,8 @@ const loadSubjects = async () => {
   try {
     const res = await fetch('/api/classroom', { headers: headers() });
     if (!res.ok) throw new Error('Failed to load subjects');
-    const subjects = await res.json();
+    let data = await res.json();
+    const subjects = Array.isArray(data) ? data : (Array.isArray(data?.subjects) ? data.subjects : []);
     
     const grid = document.getElementById('subjects-grid');
     // keep the add button
@@ -57,7 +58,9 @@ const loadSubjects = async () => {
 const loadTopics = async (subjectId) => {
   try {
     const res = await fetch(`/api/classroom/topics?subject_id=${subjectId}`, { headers: headers() });
-    const topics = await res.json();
+    if (!res.ok) throw new Error('Failed to load topics');
+    let data = await res.json();
+    const topics = Array.isArray(data) ? data : (Array.isArray(data?.topics) ? data.topics : []);
     
     const list = document.getElementById('topics-list');
     list.innerHTML = '';

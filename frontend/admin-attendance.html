@@ -93,9 +93,10 @@
     </main>
   </div>
 
-  <script src="/js/supabase.js"></script>
-  <script src="/js/app.js"></script>
-  <script>
+  <script type="module" src="/js/supabase.js"></script>
+  <script type="module" src="/js/app.js"></script>
+  <script type="module">
+    import { supabase } from '/js/supabase.js';
     document.addEventListener('DOMContentLoaded', async () => {
       // Security Check
       const { data: { session } } = await supabase.auth.getSession();

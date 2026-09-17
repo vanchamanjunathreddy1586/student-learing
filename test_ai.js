@@ -1,18 +1,12 @@
+import 'dotenv/config';
 import { callAI } from './server/services/ai-service.js';
-import * as dotenv from 'dotenv';
-dotenv.config();
 
 async function test() {
   try {
-    // No keys configured
-    process.env.GEMINI_API_KEY = '';
-    process.env.OPENAI_API_KEY = '';
-    console.log("Testing with no provider...");
-    // Let's pass a non-existent provider ID to test the final catch-all throw
-    const result = await callAI("What is photosynthesis?", "tutor", {}, "nonexistent");
-    console.log("SUCCESS:", result);
+    const res = await callAI("What is 2+2? Answer in one sentence.", "chat", {}, "gemini", false);
+    console.log(res);
   } catch (e) {
-    console.error("ERROR:", e.message);
+    console.error(e);
   }
 }
 test();

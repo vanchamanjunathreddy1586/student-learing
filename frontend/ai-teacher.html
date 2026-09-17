@@ -56,11 +56,12 @@
     .ai-header-info {
       display: flex;
       flex-direction: column;
+      gap: 4px;
     }
     
     .ai-title {
-      font-size: 18px;
       font-weight: 700;
+      font-size: 16px;
       color: var(--text-primary);
       display: flex;
       align-items: center;
@@ -68,7 +69,7 @@
     }
     
     .ai-subtitle {
-      font-size: 13px;
+      font-size: 12px;
       color: var(--text-secondary);
       display: flex;
       align-items: center;
@@ -80,7 +81,6 @@
       height: 8px;
       background: #10b981;
       border-radius: 50%;
-      display: inline-block;
       box-shadow: 0 0 8px rgba(16, 185, 129, 0.5);
     }
 
@@ -88,20 +88,14 @@
       display: flex;
       flex-direction: column;
       flex: 1;
-      width: 100%;
-      max-width: 900px;
-      margin: 0 auto;
-      overflow: hidden;
       position: relative;
+      overflow: hidden;
     }
 
     .chat-messages {
       flex: 1;
       padding: 24px;
       overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      gap: 24px;
       scroll-behavior: smooth;
     }
 
@@ -109,6 +103,9 @@
       display: flex;
       flex-direction: column;
       max-width: 85%;
+      margin-bottom: 20px;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
     }
     
     .chat-bubble-wrapper.user {
@@ -125,14 +122,18 @@
       padding: 16px 20px;
       font-size: 15px;
       line-height: 1.6;
-      border-radius: 20px;
       box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+      word-wrap: break-word;
+      overflow-wrap: break-word;
     }
 
     .chat-bubble.user {
       background: linear-gradient(135deg, var(--accent), #c054ff);
       color: #fff;
       border-bottom-right-radius: 4px;
+      border-top-left-radius: 16px;
+      border-top-right-radius: 16px;
+      border-bottom-left-radius: 16px;
     }
 
     .chat-bubble.ai {
@@ -140,6 +141,9 @@
       color: var(--text-primary);
       border: 1px solid var(--border);
       border-bottom-left-radius: 4px;
+      border-top-left-radius: 16px;
+      border-top-right-radius: 16px;
+      border-bottom-right-radius: 16px;
     }
 
     .chat-bubble.ai p:last-child {
@@ -154,19 +158,20 @@
       border-radius: 8px;
       overflow-x: auto;
       border: 1px solid rgba(255,255,255,0.1);
+      margin: 10px 0;
     }
     .chat-bubble.ai code {
       font-family: monospace;
       font-size: 13px;
+      white-space: pre-wrap;
+      word-break: break-word;
     }
 
     .chat-timestamp {
       font-size: 11px;
       color: var(--text-secondary);
       margin-top: 6px;
-      display: flex;
-      gap: 6px;
-      align-items: center;
+      padding: 0 4px;
     }
 
     .quick-actions-container {
@@ -200,19 +205,19 @@
     .typing-indicator {
       display: flex;
       gap: 4px;
-      padding: 16px 20px;
+      padding: 12px 16px;
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 20px;
+      border-radius: 16px;
       border-bottom-left-radius: 4px;
-      width: fit-content;
-      align-items: center;
+      align-self: flex-start;
+      margin-bottom: 20px;
     }
 
     .typing-dot {
       width: 6px;
       height: 6px;
-      background: var(--accent);
+      background: var(--text-secondary);
       border-radius: 50%;
       animation: typing 1.4s infinite ease-in-out both;
     }
@@ -229,22 +234,24 @@
       padding: 16px 24px;
       background: var(--surface);
       border-top: 1px solid var(--border);
+      padding-bottom: calc(16px + env(safe-area-inset-bottom));
       display: flex;
       gap: 12px;
       align-items: flex-end;
-      padding-bottom: calc(16px + env(safe-area-inset-bottom));
+      flex-shrink: 0;
     }
 
     .chat-input-wrapper {
       flex: 1;
       background: var(--bg-color);
       border: 1px solid var(--border);
-      border-radius: 24px;
-      padding: 8px 20px;
+      border-radius: 20px;
+      padding: 12px 16px;
       display: flex;
       align-items: center;
-      transition: border-color 0.2s;
+      min-height: 48px;
       box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+      transition: all 0.2s;
     }
 
     .chat-input-wrapper:focus-within {
@@ -256,13 +263,12 @@
       width: 100%;
       background: transparent;
       border: 0;
-      outline: 0;
       color: var(--text-primary);
-      padding: 6px 0;
-      resize: none;
-      max-height: 120px;
-      font-family: 'Inter', sans-serif;
+      font-family: inherit;
       font-size: 15px;
+      resize: none;
+      outline: none;
+      max-height: 120px;
       line-height: 1.5;
     }
     

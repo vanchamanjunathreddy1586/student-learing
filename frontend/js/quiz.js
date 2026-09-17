@@ -30,11 +30,18 @@ document.getElementById('start-quiz-form').onsubmit = async (e) => {
       body: JSON.stringify({ topic })
     });
     
-    if (!res.ok) throw new Error('Failed to generate quiz');
+    if (!res.ok) {
+      let errorMessage = 'Failed to generate quiz';
+      try {
+        const errorData = await res.json();
+        if (errorData.message) errorMessage = errorData.message;
+      } catch(e) {}
+      throw new Error(errorMessage);
+    }
     currentQuiz = await res.json();
     
     // Fallback if AI fails to return proper array
-    if (!currentQuiz.questions || currentQuiz.questions.length === 0) throw new Error('No questions generated');
+    if (!currentQuiz.questions || !Array.isArray(currentQuiz.questions) || currentQuiz.questions.length === 0) throw new Error('No questions generated');
     
     currentQuestionIndex = 0;
     score = 0;

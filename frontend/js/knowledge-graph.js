@@ -1,3 +1,4 @@
+import { supabase } from './supabase.js';
 document.addEventListener('DOMContentLoaded', async () => {
   try {
     if (!supabase) throw new Error('Supabase not initialized');

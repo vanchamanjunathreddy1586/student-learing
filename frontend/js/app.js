@@ -1,6 +1,28 @@
 
 
-import { getAccessToken } from './supabase.js';
+import { supabase, getAccessToken } from './supabase.js';
+
+const publicPages = ['/', '/index.html', '/login.html', '/register.html', '/forgot-password.html', '/verify-email.html', '/reset-password.html'];
+
+document.addEventListener('DOMContentLoaded', async () => {
+  if (supabase) {
+    const { data: { session } } = await supabase.auth.getSession();
+    const currentPath = window.location.pathname;
+    
+    // If we are on a protected page and there is no session
+    if (!session && !publicPages.includes(currentPath) && currentPath !== '') {
+      window.location.href = `/login.html?next=${encodeURIComponent(currentPath)}`;
+      return;
+    }
+    
+    // Auto-redirect logged-in users away from auth pages
+    if (session && (currentPath === '/login.html' || currentPath === '/register.html')) {
+      const next = new URLSearchParams(window.location.search).get('next') || '/';
+      window.location.href = next;
+      return;
+    }
+  }
+});
 
 const toast = document.querySelector('#toast');
 const showToast = (message) => { toast.textContent = message; toast.classList.add('show'); setTimeout(() => toast.classList.remove('show'), 2800); };

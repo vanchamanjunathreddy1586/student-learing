@@ -20,7 +20,8 @@ if ("Notification" in window) {
 const loadAssignments = async () => {
   try {
     const res = await fetch('/api/study/assignments', { headers: headers() });
-    const data = await res.json();
+    let rawData = await res.json();
+    const data = Array.isArray(rawData) ? rawData : (Array.isArray(rawData?.assignments) ? rawData.assignments : []);
     
     const list = document.getElementById('assignment-list');
     list.innerHTML = '';
@@ -58,7 +59,8 @@ const loadAssignments = async () => {
 const loadTimetable = async () => {
   try {
     const res = await fetch('/api/study/timetable', { headers: headers() });
-    const data = await res.json();
+    let rawData = await res.json();
+    const data = Array.isArray(rawData) ? rawData : (Array.isArray(rawData?.timetable) ? rawData.timetable : []);
     
     const list = document.getElementById('timetable-list');
     list.innerHTML = '';
@@ -128,6 +130,13 @@ document.getElementById('assignment-form').onsubmit = async (e) => {
     document.getElementById('assignment-form').reset();
     showToast('Assignment created with AI estimate!');
     loadAssignments();
+  } else {
+    let errMsg = 'Failed to create assignment';
+    try {
+      const errData = await res.json();
+      if (errData.error || errData.message) errMsg = errData.message || errData.error;
+    } catch(e) {}
+    showToast(errMsg);
   }
 };
 
